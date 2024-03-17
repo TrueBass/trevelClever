@@ -1,0 +1,49 @@
+{
+    "users": {
+      "$userId": {
+        "email": "user@example.com",
+        "nickname": "nickname",
+        "password": "hashed_password",
+        "profilePhotoUrl": "url_to_profile_photo",
+        "uCurrency": "currency_type",
+        "groups": {
+          "$groupId": true
+        },
+        "transactions": {
+          "$transactionId": true
+        }
+      }
+    },
+    "Group": {
+        "$groupId": {
+          "active": true,
+          "members": {
+            "$userId": true 
+          },
+          "name": "group_name",
+          "totalSpent": 0,
+          "transactions": {
+            "$transactionId": true 
+          },
+          "gDebts": {
+            "$gDebtId": {
+              "gCurrencyTo": "currency_code",
+              "gDebt": 0,
+              "gDebtor": {
+                "$userId": true 
+              },
+              "gReceiver": {
+                "$userId": true 
+              },
+              "settledD": false
+            }
+          }
+        }
+      },
+    "transactions": {
+      "$transactionId": {
+        
+      }
+    }
+}
+  
