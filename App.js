@@ -7,18 +7,37 @@ import {
   Alert,
 } from 'react-native';
 
-import {LinearGradient} from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // firebase imports
 import { ref, set, push, child } from "firebase/database";
 
 // custom components imports:
 // for code minimalization
-//import SignUpForm from './screens/SingUpForm';
-//import MainScreen from './screens/MainScreen';
+import SignUpForm from './screens/SingUpForm';
+import MainScreen from './screens/MainScreen';
 import LoginForm from './screens/LoginForm';
 // {/* <SigninForm /> 
 export default function App() {
+
+  const [isRegistered, setIsRegistered] = useState();
+  const [showMainScreen, setShowMainScreen] = useState();
+  const [screen, setScreen] = useState(<MainScreen onUserOption={showScreenHandler}/>);
+
+  function showScreenHandler(pickedOption){
+    // pickedOption: Boolean
+    // pickedOption will be returned from the component
+    // where it was put, for example in setScreen below
+    // it emplaced in onCancel prop.
+    setScreen(pickedOption?<LoginForm onCancel={cancelSingUpHandler}/>:<SignUpForm onCancel={cancelSingUpHandler}/>);
+
+  }
+
+  function cancelSingUpHandler(){
+    // in this func we don't need a param, cuz
+    // there is only one screen we need to set.
+    setScreen(<MainScreen onUserOption={showScreenHandler}/>);
+  }
 
   return (
     <LinearGradient
@@ -26,7 +45,7 @@ export default function App() {
       style={styles.gradientComponent}
     >
       <SafeAreaView style={styles.gradientComponent}>
-        <LoginForm/>
+        {screen}
       </SafeAreaView>
     </LinearGradient>
   );

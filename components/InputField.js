@@ -1,6 +1,6 @@
 import {StyleSheet, View, Text, TextInput} from 'react-native';
 
-function InputField({fieldName, value, onChangeText, placeholder}){
+function InputField({fieldName, value, onChangeText, placeholder, secureTextEntry}){
     return (
         <View>
             <Text style={styles.fieldNameComponent}>{fieldName}</Text>
@@ -10,6 +10,7 @@ function InputField({fieldName, value, onChangeText, placeholder}){
                 placeholder={placeholder}
                 value={value}
                 onChangeText={onChangeText}
+                secureTextEntry={secureTextEntry}
             />
         </View>
     );
@@ -20,12 +21,10 @@ export default InputField;
 const styles = StyleSheet.create({
     fieldNameComponent: {
         color: '#462375',
-        fontFamily: 'Helvetica'
     },
     textInputComponent: {
         padding: 8,
         fontSize: 20,
-        fontFamily: 'Helvetica',
         fontWeight: '400',
         borderRadius: 16,
         borderColor: '#FFF8E3',

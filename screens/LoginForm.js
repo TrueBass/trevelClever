@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import {auth} from '../backend/config'
+import PrimaryButton from '../components/PrimaryButton';
 
-const LoginForm = () => {
+function LoginForm  ({onCancel}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
@@ -16,6 +17,10 @@ const LoginForm = () => {
       console.error('Login error:', error.message);
     }
   };
+
+  function cancelButtonHandler() {
+    onCancel();
+  }
 
   return (
     <View style={styles.container}>
@@ -33,7 +38,12 @@ const LoginForm = () => {
         secureTextEntry
         style={styles.input}
       />
-      <Button title="Login" onPress={handleLogin} />
+      <PrimaryButton onPress={cancelButtonHandler}>
+        Cancel
+      </PrimaryButton>
+      <PrimaryButton onPress={handleLogin}>
+        Log In
+      </PrimaryButton>
     </View>
   );
 };

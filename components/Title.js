@@ -15,7 +15,6 @@ const styles = StyleSheet.create({
         color: '#FFE6E6',
         textAlign: 'center',
         fontSize: 32,
-        fontFamily: 'Helvetica',
         fontWeight: 'bold',
     }
 });

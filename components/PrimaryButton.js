@@ -33,7 +33,6 @@ const styles = StyleSheet.create({
         color: 'black',
         textAlign: 'center',
         fontSize: 20,
-        fontFamily: 'Helvetica',
         fontWeight: '400'
     },
     pressed: {
