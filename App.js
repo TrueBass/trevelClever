@@ -7,7 +7,7 @@ import {
   Alert,
 } from 'react-native';
 
-import {LinearGradient} from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // firebase imports
 import { ref, set, push, child } from "firebase/database";
@@ -16,8 +16,20 @@ import { ref, set, push, child } from "firebase/database";
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
 import MainScreen from './screens/MainScreen';
-// {/* <SigninForm /> 
+
 export default function App() {
+
+  const [isRegistered, setIsRegistered] = useState();
+  const [showMainScreen, setShowMainScreen] = useState();
+  const [screen, setScreen] = useState(<MainScreen onUserOption={showScreenHandler}/>);
+
+  function showScreenHandler(pickedOption){
+    setScreen(<SignUpForm onCancel={cancelSingUpHandler}/>);
+  }
+
+  function cancelSingUpHandler(pickedOption){
+    setScreen(<MainScreen onUserOption={showScreenHandler}/>);
+  }
 
   return (
     <LinearGradient
@@ -25,7 +37,7 @@ export default function App() {
       style={styles.gradientComponent}
     >
       <SafeAreaView style={styles.gradientComponent}>
-        <SignUpForm/>
+        {screen}
       </SafeAreaView>
     </LinearGradient>
   );
