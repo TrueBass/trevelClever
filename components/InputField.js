@@ -19,7 +19,7 @@ export default InputField;
 
 const styles = StyleSheet.create({
     fieldNameComponent: {
-        color: '#b6b6b6',
+        color: '#462375',
         fontFamily: 'Helvetica'
     },
     textInputComponent: {

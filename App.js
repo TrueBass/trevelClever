@@ -10,13 +10,13 @@ import {
 import {LinearGradient} from 'expo-linear-gradient';
 
 // firebase imports
-import { db } from "./backend/config"
 import { ref, set, push, child } from "firebase/database";
 
 // custom components imports:
 // for code minimalization
-import SigninForm from './screens/SinginForm';
-
+import SignUpForm from './screens/SingUpForm';
+import MainScreen from './screens/MainScreen';
+// {/* <SigninForm /> 
 export default function App() {
 
   return (
@@ -25,7 +25,7 @@ export default function App() {
       style={styles.gradientComponent}
     >
       <SafeAreaView style={styles.gradientComponent}>
-        <SigninForm />
+        <SignUpForm/>
       </SafeAreaView>
     </LinearGradient>
   );
