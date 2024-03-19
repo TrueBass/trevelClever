@@ -40,7 +40,7 @@ function SignUpForm({onCancel}){
         setUserInputPasswd('');
         setUserInputNickname('');
 
-      onCancel(true);
+      onCancel();
     }
 
     return (

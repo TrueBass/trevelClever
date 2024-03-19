@@ -24,10 +24,22 @@ export default function App() {
   const [screen, setScreen] = useState(<MainScreen onUserOption={showScreenHandler}/>);
 
   function showScreenHandler(pickedOption){
+    // pickedOption: Boolean
+    // pickedOption will be returned from the component
+    // where it was put, for example in setScreen below
+    // it emplaced in onCancel prop.
     setScreen(<SignUpForm onCancel={cancelSingUpHandler}/>);
+    // this func isn't complete, cuz in setScreen func
+    // should be a ternary operator:
+    // pickedOption
+    // ? <SignInForm onCancel={...}> <- we don't have this yet
+    // : <SignUpForm onCancel={..}/>
+    // that's why we need a param pickedOption
   }
 
-  function cancelSingUpHandler(pickedOption){
+  function cancelSingUpHandler(){
+    // in this func we don't need a param, cuz
+    // there is only one screen we need to set.
     setScreen(<MainScreen onUserOption={showScreenHandler}/>);
   }
 
