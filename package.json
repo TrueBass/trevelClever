@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.22.3",
+    "@react-native-firebase/auth": "^19.0.1",
     "axios": "^1.6.8",
     "expo": "~50.0.11",
     "expo-linear-gradient": "~12.7.2",
@@ -17,7 +18,7 @@
     "firebase": "^10.9.0",
     "mongodb": "^6.5.0",
     "react": "18.2.0",
-    "react-native": "0.73.4",
+    "react-native": "^0.73.4",
     "react-native-linear-gradient": "^2.8.3"
   },
   "devDependencies": {

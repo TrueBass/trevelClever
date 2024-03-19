@@ -14,8 +14,9 @@ import { ref, set, push, child } from "firebase/database";
 
 // custom components imports:
 // for code minimalization
-import SignUpForm from './screens/SingUpForm';
-import MainScreen from './screens/MainScreen';
+//import SignUpForm from './screens/SingUpForm';
+//import MainScreen from './screens/MainScreen';
+import LoginForm from './screens/LoginForm';
 // {/* <SigninForm /> 
 export default function App() {
 
@@ -25,7 +26,7 @@ export default function App() {
       style={styles.gradientComponent}
     >
       <SafeAreaView style={styles.gradientComponent}>
-        <SignUpForm/>
+        <LoginForm/>
       </SafeAreaView>
     </LinearGradient>
   );
