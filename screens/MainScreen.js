@@ -2,7 +2,7 @@ import Title from "../components/Title";
 import PrimaryButton from "../components/PrimaryButton";
 
 import { useState } from "react";
-import {View, Text, StyleSheet} from "react-native";
+import {View, StyleSheet} from "react-native";
 
 function MainScreen({onUserOption}){
 

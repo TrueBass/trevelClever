@@ -9,15 +9,12 @@ import {
 
 import { LinearGradient } from 'expo-linear-gradient';
 
-// firebase imports
-import { ref, set, push, child } from "firebase/database";
-
 // custom components imports:
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
 import MainScreen from './screens/MainScreen';
 import LoginForm from './screens/LoginForm';
-// {/* <SigninForm /> 
+
 export default function App() {
 
   const [isRegistered, setIsRegistered] = useState();
@@ -30,7 +27,6 @@ export default function App() {
     // where it was put, for example in setScreen below
     // it emplaced in onCancel prop.
     setScreen(pickedOption?<LoginForm onCancel={cancelSingUpHandler}/>:<SignUpForm onCancel={cancelSingUpHandler}/>);
-
   }
 
   function cancelSingUpHandler(){

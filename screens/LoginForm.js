@@ -11,7 +11,6 @@ function LoginForm  ({onCancel}) {
   const handleLogin = async () => {
     try {
       const response = await signInWithEmailAndPassword(auth,email, password);
-      console.log(response);
       console.log('Login successful!');
     } catch (error) {
       console.error('Login error:', error.message);

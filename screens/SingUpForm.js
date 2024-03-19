@@ -1,11 +1,14 @@
 import { View, StyleSheet, Alert } from "react-native";
 import { useState } from "react";
 
+// firebase imports
 import {
-  createUserWithEmailAndPassword,
+    createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { auth } from "../backend/config";
+import { ref, set } from "firebase/database";
+import { auth, db } from "../backend/config";
 
+// custom components
 import Title from '../components/Title';
 import InputField from '../components/InputField';
 import PrimaryButton from '../components/PrimaryButton';
@@ -21,16 +24,31 @@ function SignUpForm({onCancel}){
       if (userInputEmail.trim() === '' ||
           userInputNickname.trim() === '' ||
           userInputPasswd.trim() === '') {
-          alert('Please fill in all fields.');
+          Alert.alert('Please fill in all fields.');
           return;
       }
 
-      try{
-          const response = await createUserWithEmailAndPassword(auth, userInputEmail, userInputPasswd);
-          
-      } catch(error){
-          console.log(error);
-          alert('Register failed: ' + error.message);
+      try {
+        // Create user with Firebase Authentication
+        const response = await createUserWithEmailAndPassword(auth, userInputEmail, userInputPasswd);
+        // Prepare user data for Realtime db
+        // Here should be Ania's schemas
+        // (No pushing, just waiting;))
+        const userData = { userInputPasswd, userInputEmail, userInputNickname };
+        // Update Realtime db with user data
+        await set(ref(db, 'users/' + response.user.uid), userData);
+        // Success message and form reset
+        Alert.alert(
+          "Registration Successful",
+          "U have been registered successfully"
+        );
+        setUserInputEmail('');
+        setUserInputPasswd('');
+        setUserInputNickname('');
+      } catch (error) {
+        // Handle registration errors
+        console.error("Registration failed:", error);
+        Alert.alert('Register failed:', error.message);
       }
     }
     
