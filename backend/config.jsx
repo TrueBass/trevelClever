@@ -22,3 +22,5 @@ export const db = getDatabase(app, firebaseConfig.databaseURL);
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
+// auth and db variables need to put user's values
+// to the Realtime db and Authentication

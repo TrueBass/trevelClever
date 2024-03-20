@@ -29,6 +29,11 @@ function SignUpForm({onCancel}){
       }
 
       try {
+        // HERE!
+        // command "response = await createUserWithEmailAndPassword"
+        // for saving user to Authentication and
+        // command "await set" for savind user to Realtime db
+        // so it's binded.
         // Create user with Firebase Authentication
         const response = await createUserWithEmailAndPassword(auth, userInputEmail, userInputPasswd);
         // Prepare user data for Realtime db
