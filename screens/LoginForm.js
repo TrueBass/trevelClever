@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import {React, useState } from 'react';
+import {
+  View,
+  Text,
+  Alert,
+  TextInput,
+  StyleSheet
+} from 'react-native';
+
+import {auth} from '../backend/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import {auth} from '../backend/config'
+
 import PrimaryButton from '../components/PrimaryButton';
 
 function LoginForm  ({onCancel}) {
@@ -11,7 +19,7 @@ function LoginForm  ({onCancel}) {
   const handleLogin = async () => {
     try {
       const response = await signInWithEmailAndPassword(auth,email, password);
-      console.log('Login successful!');
+      Alert.alert('Login successful!');
     } catch (error) {
       console.error('Login error:', error.message);
     }
