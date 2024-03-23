@@ -15,11 +15,19 @@ import { ref, set, push, child } from "firebase/database";
 
 // custom components imports:
 // for code minimalization
+<<<<<<< Updated upstream
 import Title from './components/Title';
 import InputField from './components/InputField';
 import PrimaryButton from './components/PrimaryButton';
+=======
+import SignUpForm from './screens/SingUpForm';
+import MainScreen from './screens/MainScreen';
+import LoginForm from './screens/LoginForm';
+//testing purposes: import {testrun} from './models/test';
+>>>>>>> Stashed changes
 
 export default function App() {
+ //testing purposes: testrun("UserOne");
 
   const [userInputNickname, setUserInputNickname] = useState('');
   const [userInputEmail, setUserInputEmail] = useState('');
@@ -57,6 +65,7 @@ export default function App() {
       console.log("Registration failed",error);
     });
   }
+<<<<<<< Updated upstream
 
   function cancelButtonHandler(){
     if(!(userInputEmail || userInputNickname || userInputPasswd))
@@ -64,6 +73,12 @@ export default function App() {
     setUserInputEmail('');
     setUserInputPasswd('');
     setUserInputNickname('');
+=======
+  function cancelSingUpHandler(){
+    // in this func we don't need a param, cuz
+    // there is only one screen we need to set.
+    setScreen(<MainScreen onUserOption={showScreenHandler}/>);
+>>>>>>> Stashed changes
   }
 
   return (
