@@ -1,10 +1,8 @@
+
 import {db} from '../backend/config'
-import { useState } from "react";
-import {ref, orderByChild, equalTo, get } from 'firebase/database';
+import {ref, orderByChild, on, update, equalTo, get } from 'firebase/database';
 import User from './usersSchema';
-import Transaction from './transactionsSchema';
-import Group from './groupsSchema';
-const UserRef = ref(db, "users");
+const usersRef = ref(db, 'user');
 // Define users
 const users = [
     {
@@ -23,15 +21,43 @@ const users = [
         nickname: "AlphaUser"
     }
 ];
-export const testrun = () => {
-        console.log("****");
-       const query = orderByChild("nickname").equalTo("AlphaUser");
-        get(query).then((snapshot)=>{
-            if(snapshot.exists()){
-                const userGet = snapshot.val();
-                console.log(userGet);
-            }else{console.log("No users found");}
-        }).catch((error)=>{console.log("Error, sorry")});
-  };
-  
-//const reference = db().ref('/users/'+);
+// export const addFieldWithValue = (collectionName, objId, fieldName, fieldValue) =>{
+//     //Push new field with a value
+//     const collectionRef = ref(db, collectionName+'/'+objId);
+//         try {
+//             const updateData = {
+//                 [fieldName] : fieldValue
+//             };
+//             update(collectionRef, updateData);
+//             console.log("Data was successfully added.");
+//           } catch (error) {
+//             console.error("Error adding new data. ", error.message);
+//           }
+// };
+// export const addFriendId = (userId, friendId) =>{
+//     //push friend's id with a True flag. (it is the way to implement ∞ ↔︎ ∞)
+//     const friendsRef = ref(db, "users/"+userId);
+//         try {
+//             const updateData = {
+//                 [friendId] : true
+//             };
+//             update(friendsRef, updateData);
+//             console.log("Your friend was successfully added.");
+//           } catch (error) {
+//             console.error("Error adding the friend ", error.message);
+//           } 
+// };
+//Function to search by neckname. note, i added indexing on nickname, so the search performs faster
+// export const testrun = (searchedNickname) => {
+//     // Construct a query to filter users by nickname
+//     const query = orderByChild(usersRef, "nickname").equalTo(searchedNickname);
+//     // Attach a listener to the query to receive the search results
+//     on(query, "value", (snapshot) => {
+//         // Iterate over the search results
+//         snapshot.forEach((childSnapshot) => {
+//             const user = childSnapshot.val();
+//             console.log(user); // Print the user data
+//         });
+//     });
+// };
+
