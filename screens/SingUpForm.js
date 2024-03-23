@@ -75,9 +75,9 @@ function SignUpForm({onCancel}){
                 <InputField
                     fieldName={'Nickname'}
                     placeholder={'nickname'}
-                    onChangeText={(userNicknameValue) => {
-                        setUserInputNickname(userNicknameValue)
-                    }}
+                    onChangeText={(userNicknameValue) =>
+                      setUserInputNickname(userNicknameValue)
+                    }
                     value={userInputNickname}
                 />
                 <InputField 
@@ -85,7 +85,7 @@ function SignUpForm({onCancel}){
                     placeholder={'email'}
                     value={userInputEmail}
                     onChangeText={(userEmailValue) =>
-                        setUserInputEmail(userEmailValue)
+                      setUserInputEmail(userEmailValue)
                     }
                 />
                 <InputField
@@ -93,7 +93,7 @@ function SignUpForm({onCancel}){
                     placeholder={'password'}
                     value={userInputPasswd}
                     onChangeText={(userPasswdValue) =>
-                        setUserInputPasswd(userPasswdValue)
+                      setUserInputPasswd(userPasswdValue)
                     }
                     secureTextEntry={true}
                 />

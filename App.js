@@ -12,14 +12,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 // custom components imports:
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
-import MainScreen from './screens/MainScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
 import LoginForm from './screens/LoginForm';
 
 export default function App() {
 
   const [isRegistered, setIsRegistered] = useState();
   const [showMainScreen, setShowMainScreen] = useState();
-  const [screen, setScreen] = useState(<MainScreen onUserOption={showScreenHandler}/>);
+  const [screen, setScreen] = useState(<WelcomeScreen onUserOption={showScreenHandler}/>);
 
   function showScreenHandler(pickedOption){
     // pickedOption: Boolean
@@ -32,7 +32,7 @@ export default function App() {
   function cancelSingUpHandler(){
     // in this func we don't need a param, cuz
     // there is only one screen we need to set.
-    setScreen(<MainScreen onUserOption={showScreenHandler}/>);
+    setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
 
   return (

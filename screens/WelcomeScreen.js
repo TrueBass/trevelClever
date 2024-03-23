@@ -2,15 +2,15 @@ import Title from "../components/Title";
 import PrimaryButton from "../components/PrimaryButton";
 
 import { useState } from "react";
-import {View, StyleSheet} from "react-native";
+import { View, StyleSheet } from "react-native";
 
-function MainScreen({onUserOption}){
+function WelcomeScreen({ onUserOption }) {
 
-    function signUpHandler(){
+    function signUpHandler() {
         onUserOption(false);
     }
 
-    function signInHandler(){
+    function signInHandler() {
         onUserOption(true);
     }
 
@@ -31,7 +31,7 @@ function MainScreen({onUserOption}){
     );
 }
 
-export default MainScreen;
+export default WelcomeScreen;
 
 const styles = StyleSheet.create({
     main: {
