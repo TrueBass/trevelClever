@@ -1,10 +1,20 @@
-import {db} from '../backend/config'
-import { useState } from "react";
-import {ref, orderByChild, equalTo, get } from 'firebase/database';
+import {db} from '../backend/config';
+
+import {
+    ref,
+    get,
+    query,
+    equalTo,
+    orderByKey,
+    orderByChild,
+} from "@firebase/database";
+
 import User from './usersSchema';
 import Transaction from './transactionsSchema';
 import Group from './groupsSchema';
+
 const UserRef = ref(db, "users");
+
 // Define users
 const users = [
     {
@@ -23,15 +33,19 @@ const users = [
         nickname: "AlphaUser"
     }
 ];
-export const testrun = () => {
-        console.log("****");
-       const query = orderByChild("nickname").equalTo("AlphaUser");
-        get(query).then((snapshot)=>{
-            if(snapshot.exists()){
-                const userGet = snapshot.val();
-                console.log(userGet);
-            }else{console.log("No users found");}
-        }).catch((error)=>{console.log("Error, sorry")});
-  };
-  
-//const reference = db().ref('/users/'+);
+
+export default function testrun(){
+
+    const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo('UserOne'));
+
+    get(queryUserByNickname).then((snapshot) => {
+        if(snapshot.exists()){
+            const userGet = snapshot.val();
+            console.log(userGet);
+        }else{
+            console.log("No users found");
+        }
+    }).catch((error) => console.log("Error, sorry"));
+}
+
+// const reference = db().ref('/users/'+);

@@ -9,6 +9,8 @@ import {
 
 import { LinearGradient } from 'expo-linear-gradient';
 
+import testrun from "./models/test/";
+
 // custom components imports:
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
@@ -37,6 +39,8 @@ export default function App() {
     // there is only one screen we need to set.
     setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
+
+  // testrun();
 
   return (
     <LinearGradient
