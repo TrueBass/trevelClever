@@ -1,22 +1,59 @@
-import React from 'react'
+import "react-native-gesture-handler";
+import React from 'react';
 import { View, StyleSheet } from "react-native";
+import {
+    SimpleLineIcons,
+    MaterialIcons,
+    MaterialCommunityIcons,
+    FontAwesome
+} from "@expo/vector-icons";
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import CameraScreen from "./CameraScreen";
 
+const Drawer = createDrawerNavigator();
 
 function SideMenuScreen() {
     return (
-        <View style={styles.main}>
-             
-
-        </View>
+         <NavigationContainer>
+            <Drawer.Navigator screenOptions={styles}>
+                <Drawer.Screen
+                    name="CameraScreen"
+                    options={
+                        {
+                            drawerLabel:"CameraScreen",
+                            title:"CameraScreen",
+                            drawerIcon:() => (
+                                <SimpleLineIcons
+                                    name="home"
+                                    size={20}
+                                    color="#808080"
+                                />)
+                        }
+                    }
+                    component={CameraScreen}
+                />
+            </Drawer.Navigator>
+        </NavigationContainer>
     );
 }
 
 export default SideMenuScreen;
 
 const styles = StyleSheet.create({
-    main: {
-        flex: 1,
-        justifyContent: 'space-evenly',
-        alignContent: 'center',
+    drawerStyle:{
+        backgroundColor : "#fff",
+        width :250
+    },
+    headerStyle:{
+        backgroundColor: "f4511e"
+    },
+    headerTintColor: "#fff",
+    headerTittleStyle:{
+        fontWeight:"bold"
+    },
+    drawerActiveTintColor:"blue",
+    drawerLabelStyle:{
+        color:"#111"
     }
 });

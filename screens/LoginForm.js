@@ -12,14 +12,18 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import PrimaryButton from '../components/PrimaryButton';
 
-function LoginForm  ({onCancel}) {
+function LoginForm({onPressLogin, onCancel}) {
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
   const handleLogin = async () => {
     try {
-      const response = await signInWithEmailAndPassword(auth,email, password);
+      await signInWithEmailAndPassword(auth,email, password);
       Alert.alert('Login successful!');
+      // loads main screen
+      // won't load it if there are some errors
+      onPressLogin();
     } catch (error) {
       Alert.alert('Login error:', error.message);
     }

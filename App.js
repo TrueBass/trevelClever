@@ -14,19 +14,22 @@ import { LinearGradient } from 'expo-linear-gradient';
 import SignUpForm from './screens/SingUpForm';
 import WelcomeScreen from './screens/WelcomeScreen';
 import LoginForm from './screens/LoginForm';
+import SideMenuScreen from './screens/SideMenuScreen';
 
 export default function App() {
 
-  const [isRegistered, setIsRegistered] = useState();
-  const [showMainScreen, setShowMainScreen] = useState();
   const [screen, setScreen] = useState(<WelcomeScreen onUserOption={showScreenHandler}/>);
+  
+  function loginButtonHandler(){
+    setScreen(<SideMenuScreen />);
+  }
 
   function showScreenHandler(pickedOption){
     // pickedOption: Boolean
     // pickedOption will be returned from the component
     // where it was put, for example in setScreen below
     // it emplaced in onCancel prop.
-    setScreen(pickedOption?<LoginForm onCancel={cancelSingUpHandler}/>:<SignUpForm onCancel={cancelSingUpHandler}/>);
+    setScreen(pickedOption?<LoginForm onPressLogin={loginButtonHandler} onCancel={cancelSingUpHandler}/>:<SignUpForm onCancel={cancelSingUpHandler}/>);
   }
 
   function cancelSingUpHandler(){
