@@ -4,13 +4,13 @@ const Users = {
     profilePhotoUrl: String,
     uCurrency: String,
     groups: {
-      $groupId: Boolean, 
+      $groupId: Boolean,
     },
     transactions: {
-      $transactionId: Boolean, 
+      $transactionId: Boolean,
     },
     friends: {
-      $friendID: Boolean, 
+      $friendID: Boolean,
     },
     numFriends:Number, //how many friends user has
   };
