@@ -21,7 +21,7 @@ function LoginForm  ({onCancel}) {
       const response = await signInWithEmailAndPassword(auth,email, password);
       Alert.alert('Login successful!');
     } catch (error) {
-      console.error('Login error:', error.message);
+      Alert.alert('Login error:', error.message);
     }
   };
 
