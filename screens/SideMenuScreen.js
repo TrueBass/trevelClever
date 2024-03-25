@@ -10,6 +10,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import CameraScreen from "./CameraScreen";
+import FriendsScreen from "./FriendsScreen";
 
 const Drawer = createDrawerNavigator();
 
@@ -32,6 +33,22 @@ function SideMenuScreen() {
                         }
                     }
                     component={CameraScreen}
+                />
+                <Drawer.Screen
+                    name="Friends"
+                    options={
+                        {
+                            drawerLabel:"Friends",
+                            title:"Friends",
+                            drawerIcon:() => (
+                                <SimpleLineIcons
+                                    name="tag"
+                                    size={20}
+                                    color="#808080"
+                                />)
+                        }
+                    }
+                    component={FriendsScreen}
                 />
             </Drawer.Navigator>
         </NavigationContainer>

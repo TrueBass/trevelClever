@@ -8,12 +8,15 @@ import {
 import { ref, set } from "firebase/database";
 import { auth, db } from "../backend/config";
 
+// backend imports
+import Users from "../models/usersSchema";
+
 // custom components
 import Title from '../components/Title';
 import InputField from '../components/InputField';
 import PrimaryButton from '../components/PrimaryButton';
 
-function SignUpForm({onCancel}){
+function SignUpForm({onCancel, onPressSignUp}){
 
     const [userInputNickname, setUserInputNickname] = useState('');
     const [userInputEmail, setUserInputEmail] = useState('');
@@ -37,11 +40,13 @@ function SignUpForm({onCancel}){
         // Create user with Firebase Authentication
         const response = await createUserWithEmailAndPassword(auth, userInputEmail, userInputPasswd);
         // Prepare user data for Realtime db
-        // Here should be Ania's schemas
-        // (No pushing, just waiting;))
-        const userData = { userInputPasswd, userInputEmail, userInputNickname };
+        // const userData = { userInputPasswd, userInputEmail, userInputNickname };
+        Users.email = userInputEmail;
+        Users.nickname = userInputNickname;
+        Users.password = userInputPasswd;
+        Users.numFriends = 0;
         // Update Realtime db with user data
-        await set(ref(db, 'users/' + response.user.uid), userData);
+        await set(ref(db, 'users/' + response.user.uid), Users);
         // Success message and form reset
         Alert.alert(
           "Registration Successful",
@@ -50,6 +55,7 @@ function SignUpForm({onCancel}){
         setUserInputEmail('');
         setUserInputPasswd('');
         setUserInputNickname('');
+        onPressSignUp();
       } catch (error) {
         // Handle registration errors
         console.error("Registration failed:", error);

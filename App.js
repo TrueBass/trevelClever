@@ -21,9 +21,14 @@ import SideMenuScreen from './screens/SideMenuScreen';
 export default function App() {
 
   const [screen, setScreen] = useState(<WelcomeScreen onUserOption={showScreenHandler}/>);
+  const logInScreen = <LoginForm onPressLogin={loginButtonHandler} onCancel={cancelSingUpHandler}/>;
+  const signUpScreen = <SignUpForm onCancel={cancelSingUpHandler} onPressSignUp={signUpButtonHandler}/>;
   
   function loginButtonHandler(){
     setScreen(<SideMenuScreen />);
+  }
+  function signUpButtonHandler(){
+    setScreen(logInScreen);
   }
 
   function showScreenHandler(pickedOption){
@@ -31,7 +36,7 @@ export default function App() {
     // pickedOption will be returned from the component
     // where it was put, for example in setScreen below
     // it emplaced in onCancel prop.
-    setScreen(pickedOption?<LoginForm onPressLogin={loginButtonHandler} onCancel={cancelSingUpHandler}/>:<SignUpForm onCancel={cancelSingUpHandler}/>);
+    setScreen(pickedOption ? logInScreen : signUpScreen);
   }
 
   function cancelSingUpHandler(){
