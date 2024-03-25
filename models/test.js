@@ -33,15 +33,28 @@ const users = [
         nickname: "AlphaUser"
     }
 ];
+export const addFriendId = (userId, friendId) =>{
+        //push friend's id with a True flag. (it is the way to implement ∞ ↔︎ ∞)
+        const friendsRef = ref(db, "users/"+userId);
+            try {
+                const updateData = {
+                    [friendId] : true
+                };
+                update(friendsRef, updateData);
+                console.log("Your friend was successfully added.");
+              } catch (error) {
+                console.error("Error adding the friend ", error.message);
+              } 
+    };
+export default function testrun(findNick){
 
-export default function testrun(){
-
-    const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo('UserOne'));
+    const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo(findNick));
 
     get(queryUserByNickname).then((snapshot) => {
         if(snapshot.exists()){
             const userGet = snapshot.val();
             console.log(userGet);
+            //
         }else{
             console.log("No users found");
         }
