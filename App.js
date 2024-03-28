@@ -9,7 +9,7 @@ import {
 
 import { LinearGradient } from 'expo-linear-gradient';
 
-import testrun from "./models/test/";
+import {testrun,getUserPhoto} from "./models/test/";
 
 // custom components imports:
 // for code minimalization
@@ -45,7 +45,8 @@ export default function App() {
     setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
 
-  // testrun();
+  // console.log(testrun('test'));
+  // getUserPhoto('test@gmail.com');
 
   return (
     <LinearGradient

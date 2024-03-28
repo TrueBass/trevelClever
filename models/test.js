@@ -1,4 +1,4 @@
-import { db } from '../backend/config';
+import { db, auth } from '../backend/config';
 
 import {
     ref,
@@ -9,9 +9,12 @@ import {
     orderByChild,
 } from "@firebase/database";
 
+import { onAuthStateChanged } from '@firebase/auth'; 
+
 import User from './usersSchema';
 import Transaction from './transactionsSchema';
 import Group from './groupsSchema';
+import { func } from 'prop-types';
 
 const UserRef = ref(db, "users");
 
@@ -48,13 +51,12 @@ export const addFriendId = (userId, friendId) => {
     }
 };
 
-export default function testrun(findNick) {
+export function testrun(findNick) {
 
     const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo(findNick));
-
     get(queryUserByNickname).then((snapshot) => {
         if (snapshot.exists()) {
-            const userGet = snapshot.val();
+            userGet = snapshot.val();
             console.log(userGet);
             //
         } else {
