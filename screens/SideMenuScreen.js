@@ -108,17 +108,10 @@ function SideMenuScreen() {
 
 export default SideMenuScreen;
 
-<<<<<<< HEAD
-const styles = StyleSheet.create({
-    drawerStyle: {
-        backgroundColor: "#fff",
-        width: 250
-=======
 const globalNavBarStyle = StyleSheet.create({
     drawerStyle:{
         backgroundColor : "#fff",
         width :250
->>>>>>> f930fce0d83ccdd0c2a3abbbf1979fad76fa5aa8
     },
     headerStyle: {
         backgroundColor: "f4511e"
