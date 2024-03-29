@@ -12,12 +12,12 @@ import {
 
 import { onAuthStateChanged } from '@firebase/auth'; 
 
-import User from './usersSchema';
+import Users from './usersSchema';
 import Transaction from './transactionsSchema';
 import Group from './groupsSchema';
 import { func } from 'prop-types';
 
-const UserRef = ref(db, "users");
+const UserRef = ref(db, "users/");
 
 // Define users
 const users = [
@@ -41,7 +41,7 @@ const users = [
 export const addFriendId = (userId, friendId) => {
     //push friend's id with a True flag. (it is the way to implement ∞ ↔︎ ∞)
     const friendsRef = ref(db, "users/" + userId + "/friends/");
-    const numFriendRef = ref(db, "users/" + userId + "/numFriends")
+    const numFriendRef = ref(db, "users/" + userId + "/numFriends");
     update(friendsRef, { [friendId]: true })
     .then(() => {
       console.log("Your friend was successfully added.");
@@ -108,18 +108,32 @@ export const removeFriendId = (userId, friendId) => {
     });
 };
 
+export const userUidObj = {}; // For findByNick func!
 export function findByNick(findNick) {
 
-    const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo(findNick));
-    get(queryUserByNickname).then((snapshot) => {
-        if (snapshot.exists()) {
-            userGet = snapshot.val();
-            console.log(userGet);
-            //
-        } else {
-            console.log("No users found");
-        }
-    }).catch((error) => console.log("Error, sorry"));
+  const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo(findNick));
+  get(queryUserByNickname).then((snapshot) => {
+    if (snapshot.exists()) {
+      userGet = snapshot.val();
+      userUidObj.userId = Object.keys(userGet)[0];
+      Object.keys(userGet[userUidObj.userId]).forEach((key)=>{
+        // keys are adding automatically from finded user
+        // to the exported userUidObj (we should call it in another way)
+        // maybe this forEach will be changed to spread operator
+        userUidObj[key] = userGet[userUidObj.userId][key];
+      });
+    } else {
+      // if user hasn't been found
+      // we should clear the userUidObj
+      // or search will be always showing prev user
+      Object.keys(userUidObj).forEach((key) => {
+        // clearing the userUidObj
+        // by setting all the keys to undefined
+        delete userUidObj[key];
+      });
+      console.log("No users found");
+    }
+  }).catch((error) => console.log("Error, sorry", error));
 }
 
 // const reference = db().ref('/users/'+);
