@@ -109,31 +109,51 @@ export const removeFriendId = (userId, friendId) => {
 };
 
 export const userUidObj = {}; // For findByNick func!
-export function findByNick(findNick) {
-
-  const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo(findNick));
-  get(queryUserByNickname).then((snapshot) => {
+export const userFriendsArr = []; // ------//-------
+export async function findByNick(findNick) {
+  try{
+    const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo(findNick));
+    const snapshot = await get(queryUserByNickname);
     if (snapshot.exists()) {
       userGet = snapshot.val();
       userUidObj.userId = Object.keys(userGet)[0];
+        
       Object.keys(userGet[userUidObj.userId]).forEach((key)=>{
         // keys are adding automatically from finded user
         // to the exported userUidObj (we should call it in another way)
         // maybe this forEach will be changed to spread operator
         userUidObj[key] = userGet[userUidObj.userId][key];
       });
+
+      // actually we can change all of this code to
+      // more efficient and better one.
+
+      if(userUidObj.numFriends){
+        Object.keys(userGet[userUidObj.userId].friends).forEach((key) => {
+          // making an array of friends to use it then
+          userFriendsArr.push({id: key});
+        });
+      }
     } else {
       // if user hasn't been found
       // we should clear the userUidObj
-      // or search will be always showing prev user
+      // or search will be always showing prev user.
       Object.keys(userUidObj).forEach((key) => {
         // clearing the userUidObj
-        // by setting all the keys to undefined
+        // by deleting all the keys within vals.
         delete userUidObj[key];
       });
+      while(userFriendsArr.length > 0){
+        // also deleting all friends
+        // but maybe its unnecessary.
+        userFriendsArr.pop();
+      }
       console.log("No users found");
     }
-  }).catch((error) => console.log("Error, sorry", error));
+  }
+  catch (error){
+    console.error('Error fetching user', error);
+  }
 }
 
 // const reference = db().ref('/users/'+);
