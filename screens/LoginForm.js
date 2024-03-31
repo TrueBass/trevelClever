@@ -1,4 +1,4 @@
-import {React, useState } from 'react';
+import { React, useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +6,11 @@ import {
   TextInput,
   StyleSheet
 } from 'react-native';
-import FlashMessage from "react-native-flash-message";
 import { showMessage } from 'react-native-flash-message';
+import { FontAwesome6 } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 
-import {auth} from '../backend/config';
+import { auth } from '../backend/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import PrimaryButton from '../components/PrimaryButton';
@@ -25,6 +26,7 @@ function LoginForm({onPressLogin, onCancel}) {
       showMessage({
         type: 'success',
         message: 'Login successful!',
+        icon: props => <FontAwesome6 name="check-circle" size={30} color="white" />,
         duration: 3000
       })
       // loads main screen
@@ -50,13 +52,14 @@ function LoginForm({onPressLogin, onCancel}) {
         default:
           description = error.message; // Fallback for other errors
       }
-      console.log(description);
+
       showMessage({
-        type: 'warning',
+        type: 'danger',
         message,
         description,
-        duration: 3000
-      })
+        duration: 3000,
+        icon: props => <Entypo name="circle-with-cross" size={30} color="white" />
+      });
     }
   };
 

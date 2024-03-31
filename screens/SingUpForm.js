@@ -67,30 +67,33 @@ function SignUpForm({ onCancel, onPressSignUp }) {
       onPressSignUp();
     } catch (error) {
       // Handle registration errors
-      const message = 'Signup error';
-      let description;
+      const signUpMsgMessage = "Signup error";
+      let signUpMsgDescription;
+      let signUpMsgType = "warning";
 
       switch (error.code) {
         case 'auth/weak-password':
-          description = 'Password is too weak. Please choose a stronger password.';
+          signUpMsgDescription = 'Password is too weak. Please choose a stronger password.';
           break;
         case 'auth/email-already-in-use':
-          description = 'Email address is already in use. Please try a different email.';
+          signUpMsgDescription = 'Email address is already in use. Please try a different email.';
           break;
         case 'auth/invalid-email':
-          description = 'Please enter a valid email address.';
+          signUpMsgDescription = 'Please enter a valid email address.';
+          signUpMsgType = 'danger';
           break;
         case 'auth/network-request-failed':
-          description = 'Network error. Please check your internet connection.';
+          signUpMsgDescription = 'Network error. Please check your internet connection.';
+          signUpMsgType = 'danger';
           break;
         default:
-          description = error.message; // Fallback for other errors
+          signUpMsgDescription = error.message; // Fallback for other errors
       }
 
       showMessage({
-        message,
-        description,
-        type: 'warning',
+        message: signUpMsgMessage,
+        description: signUpMsgDescription,
+        type: signUpMsgType,
         duration: 3000
       });
     }

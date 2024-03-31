@@ -60,11 +60,11 @@ export default function App() {
           style={styles.flashMsg}
           titleStyle={{
             fontSize: 18,
-            textAlign: 'center'
+            marginLeft: 20
           }}
           textStyle={{
             fontSize: 18,
-            textAlign: 'center'
+            marginLeft: 20
           }}
         />
       </SafeAreaView>
@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   flashMsg: {
-    margin: 20,
+    marginBottom: 20,
+    marginHorizontal: 20,
     padding: 20,
     borderRadius: 24,
   }
