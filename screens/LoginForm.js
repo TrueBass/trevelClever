@@ -6,6 +6,8 @@ import {
   TextInput,
   StyleSheet
 } from 'react-native';
+import FlashMessage from "react-native-flash-message";
+import { showMessage } from 'react-native-flash-message';
 
 import {auth} from '../backend/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -20,12 +22,41 @@ function LoginForm({onPressLogin, onCancel}) {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth,email, password);
-      Alert.alert('Login successful!');
+      showMessage({
+        type: 'success',
+        message: 'Login successful!',
+        duration: 3000
+      })
       // loads main screen
       // won't load it if there are some errors
       onPressLogin();
     } catch (error) {
-      Alert.alert('Login error:', error.message);
+      const message = 'Login error';
+      let description;
+
+      switch (error.code) {
+        case 'auth/wrong-password':
+          description = 'Incorrect password. Please try again.';
+          break;
+        case 'auth/user-not-found':
+          description = 'User not found. Please check your email address.';
+          break;
+        case 'auth/network-request-failed':
+          description = 'Network error. Please check your internet connection.';
+          break;
+        case 'auth/invalid-email':
+          description = 'Incorrect email.';
+          break;
+        default:
+          description = error.message; // Fallback for other errors
+      }
+      console.log(description);
+      showMessage({
+        type: 'warning',
+        message,
+        description,
+        duration: 3000
+      })
     }
   };
 

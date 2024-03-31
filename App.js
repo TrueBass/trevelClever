@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
-
+import FlashMessage from 'react-native-flash-message';
 import {removeFriendId,getUserPhoto} from "./models/test/";
 
 // custom components imports:
@@ -55,6 +55,18 @@ export default function App() {
     >
       <SafeAreaView style={styles.gradientComponent}>
         {screen}
+        <FlashMessage
+          position="bottom"
+          style={styles.flashMsg}
+          titleStyle={{
+            fontSize: 18,
+            textAlign: 'center'
+          }}
+          textStyle={{
+            fontSize: 18,
+            textAlign: 'center'
+          }}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -66,4 +78,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center'
   },
+  flashMsg: {
+    margin: 20,
+    padding: 20,
+    borderRadius: 24,
+  }
 });
