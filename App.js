@@ -9,8 +9,8 @@ import {
 
 import { LinearGradient } from 'expo-linear-gradient';
 import FlashMessage from 'react-native-flash-message';
-import {removeFriendId,getUserPhoto} from "./models/test/";
-
+//import {findByNick,getUserPhoto} from "./models/test/";
+import {updateGroupMembers} from './models/groupTest/';
 // custom components imports:
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
@@ -23,7 +23,7 @@ export default function App() {
   const [screen, setScreen] = useState(<WelcomeScreen onUserOption={showScreenHandler}/>);
   const logInScreen = <LoginForm onPressLogin={loginButtonHandler} onCancel={cancelSingUpHandler}/>;
   const signUpScreen = <SignUpForm onCancel={cancelSingUpHandler} onPressSignUp={signUpButtonHandler}/>;
-  
+ 
   function loginButtonHandler(){
     setScreen(<SideMenuScreen />);
   }
@@ -44,8 +44,9 @@ export default function App() {
     // there is only one screen we need to set.
     setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
-  //removeFriendId("BaJ6rgAelpfummrGipoNXQktip22", "-Nt_-3QPI1v-utxL1Tuh");
-  // console.log(testrun('test'));
+  const userId = "BaJ6rgAelpfummrGipoNXQktip22";
+  const groupId = "-NuS9gCXxn68T3i0X9wU";
+  
   // getUserPhoto('test@gmail.com');
 
   return (

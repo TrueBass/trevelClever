@@ -117,12 +117,13 @@ export async function findByNick(findNick) {
     if (snapshot.exists()) {
       userGet = snapshot.val();
       userUidObj.userId = Object.keys(userGet)[0];
-        
+
       Object.keys(userGet[userUidObj.userId]).forEach((key)=>{
-        // keys are adding automatically from finded user
+        // all user's fields are adding automatically 
         // to the exported userUidObj (we should call it in another way)
         // maybe this forEach will be changed to spread operator
         userUidObj[key] = userGet[userUidObj.userId][key];
+        console.log("userUidObj[key]: ", userUidObj[key])
       });
 
       // actually we can change all of this code to
