@@ -28,7 +28,7 @@ function LoginForm({onPressLogin, onCancel}) {
         message: 'Login successful!',
         icon: props => <FontAwesome6 name="check-circle" size={30} color="white" />,
         duration: 3000
-      })
+      });
       // loads main screen
       // won't load it if there are some errors
       onPressLogin();

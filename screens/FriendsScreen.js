@@ -22,8 +22,8 @@ export default function FriendsScreen(){
         // this is working great now
         // because of async/await.
         await findByNick(friendNickname);
-        console.log(userUidObj);
-        console.log(userFriendsArr);
+        // console.log(userUidObj);
+        // console.log(userFriendsArr);
         if(Object.keys(userUidObj).length !== 0){
             // userUidObj is from findByNick func
             // contains val() from snapshot
@@ -31,7 +31,7 @@ export default function FriendsScreen(){
             setSearchResultText(<FriendTitle nickname={userUidObj.nickname} profilePhoto={userUidObj.profilePhotoUrl}/>);
         }
         else{
-            setSearchResultText(<Text>There is no such friend...</Text>);
+            setSearchResultText(<Text style={{fontSize: 20}}>There is no such friend...</Text>);
         }
     }
 
@@ -70,29 +70,23 @@ const styles = StyleSheet.create({
     main: {
         flex: 1,
         justifyContent: 'space-around',
-        // alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'red',
     },
     input: {
         flex: 1,
-        
-        borderWidth: 1,
-        borderColor: 'red',
+        marginHorizontal: 20,
     },
     messageView: {
         flex: 3,
-        justifyContent: 'space-around',
+        flexDirection: 'row',
+        justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'red',
+        marginHorizontal: 20,
     },
     buttonView: {
         flex: 5,
         flexDirection: 'row-reverse',
         justifyContent: 'space-between',
-        alignItems: 'baseline',
-        borderWidth: 1,
-        borderColor: 'red',
+        alignItems: 'center',
+        marginHorizontal: 20,
     },
 });

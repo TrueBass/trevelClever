@@ -2,6 +2,7 @@ import { View, StyleSheet, Alert } from "react-native";
 import { useState } from "react";
 import { showMessage } from 'react-native-flash-message';
 import FlashMessage from "react-native-flash-message";
+import {FontAwesome6} from "@expo/vector-icons";
 
 // firebase imports
 import {
@@ -31,7 +32,7 @@ function SignUpForm({ onCancel, onPressSignUp }) {
       userInputPasswd.trim() === '') {
       // Alert.alert('Please fill in all fields.');
       showMessage({
-        message: '',
+        message: 'Error',
         description: "Please fill in all fields.",
         type: 'warning',
         duration: 5000
@@ -59,7 +60,8 @@ function SignUpForm({ onCancel, onPressSignUp }) {
       showMessage({
         message: "Registration Successful",
         type: 'success',
-        duration: 3000
+        duration: 3000,
+        icon: props => <FontAwesome6 name="check-circle" size={30} color="white" />
       });
       setUserInputEmail('');
       setUserInputPasswd('');

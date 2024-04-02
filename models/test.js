@@ -123,7 +123,7 @@ export async function findByNick(findNick) {
         // to the exported userUidObj (we should call it in another way)
         // maybe this forEach will be changed to spread operator
         userUidObj[key] = userGet[userUidObj.userId][key];
-        console.log("userUidObj[key]: ", userUidObj[key])
+        // console.log("userUidObj[key]: ", userUidObj[key])
       });
 
       // actually we can change all of this code to
