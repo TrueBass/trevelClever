@@ -8,7 +8,7 @@ export default function FriendTitle({ nickname, profilePhoto = null }) {
             <View style={styles.backGround}>
                 <View style={styles.image}>
                     {
-                        profilePhoto
+                        profilePhoto // if profilePhoto is null - use FontAwesome5
                             ? <Image source={{ uri: profilePhoto }} style={{ width: 100, height: 100 }} />
                             : <FontAwesome5 name="user-alt" size={100} color="black" />
                     }
@@ -24,6 +24,8 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
+        // borderWidth:1,
+        // borderColor: 'red',
     },
     backGround: {
         flex: 1,
@@ -33,7 +35,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#bc86d7ff',
         borderRadius: 50,
         overflow: 'hidden',
-        width: 100
+        width: 100,
+        // borderWidth:1,
+        // borderColor: 'red',
     },
     image: {
         borderWidth: 3,

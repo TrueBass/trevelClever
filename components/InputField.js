@@ -3,7 +3,9 @@ import {StyleSheet, View, Text, TextInput} from 'react-native';
 function InputField({fieldName, value, onChangeText, placeholder, secureTextEntry}){
     return (
         <View>
-            <Text style={styles.fieldNameComponent}>{fieldName ?? ""}</Text>
+            {
+                fieldName && <Text style={styles.fieldNameComponent}>{fieldName}</Text>
+            }
             <TextInput
                 style={styles.textInputComponent}
                 autoCapitalize='none'

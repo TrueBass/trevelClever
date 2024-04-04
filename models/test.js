@@ -1,3 +1,4 @@
+import { showMessage } from 'react-native-flash-message';
 import { db } from '../backend/config';
 
 import {
@@ -108,52 +109,51 @@ export const removeFriendId = (userId, friendId) => {
     });
 };
 
-export const userUidObj = {}; // For findByNick func!
-export const userFriendsArr = []; // ------//-------
+/**
+ * Finds a friend by their nickname and returns their user object.
+ * 
+ * @param {string} findNick - The nickname of the friend to search for.
+ * @returns {object} The user object of the found friend
+ * \
+ * \
+ * if user hasn't been found, returns 400
+ * \
+ * \
+ * object contains the following properties:
+ *   - email {string} - The email address of the friend.
+ *   - friends {object} - An object: keys friend IDs, vals: {boolean}
+ *   - groups {object} - An object of group IDs.
+ *   - nickname {string} - The nickname of the friend.
+ *   - numFriends {number} - The number of friends the friend has.
+ *   - password {string} - The password of the friend.
+ *   - profilePhotoUrl {string} - The URL of the friend's profile photo.
+ *   - transactions {object} - An object of transaction IDs.
+ *   - uCurrency {number} - User's currency.
+ *   - userId {string} - The unique ID of the friend.
+ */
 export async function findByNick(findNick) {
   try{
     const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo(findNick));
     const snapshot = await get(queryUserByNickname);
+    
     if (snapshot.exists()) {
+      const userUidObj = {};
+      userUidObj = 'a';
       userGet = snapshot.val();
-      userUidObj.userId = Object.keys(userGet)[0];
-
-      Object.keys(userGet[userUidObj.userId]).forEach((key)=>{
-        // all user's fields are adding automatically 
-        // to the exported userUidObj (we should call it in another way)
-        // maybe this forEach will be changed to spread operator
-        userUidObj[key] = userGet[userUidObj.userId][key];
-        // console.log("userUidObj[key]: ", userUidObj[key])
-      });
-
-      // actually we can change all of this code to
-      // more efficient and better one.
-
-      if(userUidObj.numFriends){
-        Object.keys(userGet[userUidObj.userId].friends).forEach((key) => {
-          // making an array of friends to use it then
-          userFriendsArr.push({id: key});
-        });
-      }
+      userUidObj.userId = Object.keys(userGet)[0]; // keys(): returns an array with one key we need (in this case)
+      return Object.assign(userUidObj, userGet[userUidObj.userId]); // copying and returning an obj
     } else {
-      // if user hasn't been found
-      // we should clear the userUidObj
-      // or search will be always showing prev user.
-      Object.keys(userUidObj).forEach((key) => {
-        // clearing the userUidObj
-        // by deleting all the keys within vals.
-        delete userUidObj[key];
-      });
-      while(userFriendsArr.length > 0){
-        // also deleting all friends
-        // but maybe its unnecessary.
-        userFriendsArr.pop();
-      }
-      console.log("No users found");
+      return 400; // if we didn't find a user
     }
   }
-  catch (error){
-    console.error('Error fetching user', error);
+  catch (error) {
+    showMessage({
+      message: "Error fetching user",
+      description: error.message || "Unknown error occurred",
+      type: "danger",
+      icon: { icon: "danger", position: "left" },
+      duration: 3000
+    });
   }
 }
 
