@@ -11,66 +11,35 @@ import {
     orderByChild,
 } from "@firebase/database";
 
-import { onAuthStateChanged } from '@firebase/auth'; 
+// import { onAuthStateChanged } from '@firebase/auth'; 
 
-import Users from './usersSchema';
-import Transaction from './transactionsSchema';
-import Group from './groupsSchema';
-import { func } from 'prop-types';
+// import Users from './usersSchema';
+// import Transaction from './transactionsSchema';
+// import Group from './groupsSchema';
+// import { func } from 'prop-types';
 
-const UserRef = ref(db, "users/");
-
-// Define users
-const users = [
-    {
-        email: "user1@gmail.com",
-        password: "truebass",
-        nickname: "UserOne"
-    },
-    {
-        email: "user2@gmail.com",
-        password: "truebass",
-        nickname: "UserTwo"
-    },
-    {
-        email: "TrueBass@gmail.com",
-        password: "truebass",
-        nickname: "AlphaUser"
-    }
-];
-
-export const addFriendId = (userId, friendId) => {
-    //push friend's id with a True flag. (it is the way to implement ∞ ↔︎ ∞)
-    const friendsRef = ref(db, "users/" + userId + "/friends/");
+export async function addFriendId(userId, friendId) {
+  try {
+    const friendsRef = ref(db, `users/${userId}/friends/`);
     const numFriendRef = ref(db, "users/" + userId + "/numFriends");
-    update(friendsRef, { [friendId]: true })
-    .then(() => {
-      console.log("Your friend was successfully added.");
-      get(numFriendRef)
-        .then((snapshot) => {
-          let newCount;
-          if (snapshot.exists()) {
-            const currentCount = snapshot.val();
-            newCount = (currentCount || 0) + 1; // Ensure we have a number
-          } else {
-            newCount = 1; // Initialize the friend count to 1 if it doesn't exist
-            console.log("numFriendRef does not exist. Initializing friend count to 1.");
-          }
-          // Update the value directly using set
-          set(numFriendRef, newCount).then(() => {
-            console.log("Friend count updated to: ", newCount);
-          }).catch((error) => {
-            console.error("Error updating friend count", error);
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching numFriendRef", error);
-        });
-    })
-    .catch((error) => {
-      console.error("Error adding the friend ", error.message);
-    });
-};
+    await update(friendsRef, { [friendId]: true });
+    console.log("Your friend was successfully added.");
+    //current friend count
+    const snapshot = await get(numFriendRef);
+    let newCount;
+    if (snapshot.exists()) {
+      const currentCount = snapshot.val();
+      newCount = (currentCount || 0) + 1; 
+    } else {
+      newCount = 1; 
+      console.log("numFriendRef does not exist. Initializing friend count to 1.");
+    }
+    await set(numFriendRef, newCount);
+    console.log("Friend count updated to: ", newCount);
+  } catch (error) {
+    console.error("Error occurred during the friend addition process", error);
+  }
+}
 export const removeFriendId = (userId, friendId) => {
     // Reference to friend's ID under the user's friends list.
     const friendsRef = ref(db, "users/" + userId + "/friends/");
