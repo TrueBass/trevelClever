@@ -147,4 +147,20 @@ export async function updateGroupMembers(userId, groupId, memberIds) {
     }
   }
   
-
+// RETRIEVE the list of groups for a user
+export async function getUserGroups(userId) {
+  try {
+    const userGroupsRef = ref(db, `users/${userId}/groups`);
+    const snapshot = await get(userGroupsRef);
+    if (snapshot.exists()) {
+      return snapshot.val(); 
+      //console.log(snapshot.val());
+    } else {
+      console.log('User is not part of any groups.');
+      return {};
+    }
+  } catch (error) {
+    console.error('Error fetching user groups:', error);
+    throw error;
+  }
+}
