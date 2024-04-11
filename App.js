@@ -9,7 +9,7 @@ import {
 
 import { LinearGradient } from 'expo-linear-gradient';
 import FlashMessage from 'react-native-flash-message';
-import {addFriendId} from "./models/test/";
+import {removeFriend} from "./models/test/";
 //import {updateGroupMembers} from './models/groupTest/';
 // custom components imports:
 // for code minimalization
@@ -46,7 +46,7 @@ export default function App() {
   }
   const userId = "kec78HNqQeNNjTKJzQcLvwdHvFk2";
   const groupId = "-NuS9gCXxn68T3i0X9wU";
-  addFriendId(userId, "-Nt_-3QOVzxXcgvwE_eS");
+  removeFriend(userId, "-Nt_-3QMIQgtiOr-WFUl");
   // getUserPhoto('test@gmail.com');
 
   return (

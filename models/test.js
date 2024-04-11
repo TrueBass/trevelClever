@@ -9,6 +9,7 @@ import {
     equalTo,
     set,
     orderByChild,
+    runTransaction
 } from "@firebase/database";
 
 // import { onAuthStateChanged } from '@firebase/auth'; 
@@ -40,43 +41,70 @@ export async function addFriendId(userId, friendId) {
     console.error("Error occurred during the friend addition process", error);
   }
 }
-export const removeFriendId = (userId, friendId) => {
-    // Reference to friend's ID under the user's friends list.
-    const friendsRef = ref(db, "users/" + userId + "/friends/");
-    const numFriendRef = ref(db, "users/" + userId + "/numFriends")
-    
-    // Remove the friend's ID by setting the value to null.
-    update(friendsRef, { [friendId]: null })
-    .then(() => {
-      console.log("Your friend was successfully removed.");
-      get(numFriendRef)
-        .then((snapshot) => {
-          let newCount;
-          if (snapshot.exists()) {
-            const currentCount = snapshot.val();
-            newCount = (currentCount || 1) - 1; // Ensure we have a number and do not go below 0
-            if (newCount < 0) {
-              newCount = 0; // Ensure we do not have negative friend counts
-            }
-          } else {
-            newCount = 0; // If it doesn't exist or is already 0, keep it at 0
-            console.log("numFriendRef does not exist or is already 0. Keeping friend count at 0.");
-          }
-          // Update the value directly using set
-          set(numFriendRef, newCount).then(() => {
-            console.log("Friend count updated to: ", newCount);
-          }).catch((error) => {
-            console.error("Error updating friend count", error);
-          });
-        })
-        .catch((error) => {
-          console.error("Error fetching numFriendRef", error);
-        });
-    })
-    .catch((error) => {
-      console.error("Error removing the friend", error.message);
+
+export async function removeFriend(userId, friendId) {
+  try {
+    const friendsRef = ref(db, `users/${userId}/friends/`);
+    const numFriendRef = ref(db, `users/${userId}/numFriends`);
+
+    // Remove the friend's ID by setting the value to null
+    await update(friendsRef, { [friendId]: null });
+    console.log("Your friend was successfully removed.");
+
+    // Atomically update the friend count using a transaction
+    await runTransaction(numFriendRef, (currentCount) => {
+      if (currentCount === null) {
+        // If it doesn't exist, we assume it is 0
+        return 0;
+      }
+      // Decrease the count but do not go below 0
+      return Math.max(0, currentCount - 1);
     });
-};
+
+    // Assuming the transaction was successful, we log the new count
+    const newCountSnapshot = await get(numFriendRef);
+    console.log("Friend count updated to: ", newCountSnapshot.val());
+  } catch (error) {
+    console.error("Error occurred while removing friend or updating count", error);
+  }
+}
+// export async function removeFriendId(userId, friendId){
+//     // Reference to friend's ID under the user's friends list.
+//     const friendsRef = ref(db, "users/" + userId + "/friends/");
+//     const numFriendRef = ref(db, "users/" + userId + "/numFriends")
+    
+//     // Remove the friend's ID by setting the value to null.
+//     update(friendsRef, { [friendId]: null })
+//     .then(() => {
+//       console.log("Your friend was successfully removed.");
+//       get(numFriendRef)
+//         .then((snapshot) => {
+//           let newCount;
+//           if (snapshot.exists()) {
+//             const currentCount = snapshot.val();
+//             newCount = (currentCount || 1) - 1; // Ensure we have a number and do not go below 0
+//             if (newCount < 0) {
+//               newCount = 0; // Ensure we do not have negative friend counts
+//             }
+//           } else {
+//             newCount = 0; // If it doesn't exist or is already 0, keep it at 0
+//             console.log("numFriendRef does not exist or is already 0. Keeping friend count at 0.");
+//           }
+//           // Update the value directly using set
+//           set(numFriendRef, newCount).then(() => {
+//             console.log("Friend count updated to: ", newCount);
+//           }).catch((error) => {
+//             console.error("Error updating friend count", error);
+//           });
+//         })
+//         .catch((error) => {
+//           console.error("Error fetching numFriendRef", error);
+//         });
+//     })
+//     .catch((error) => {
+//       console.error("Error removing the friend", error.message);
+//     });
+// };
 
 /**
  * Finds a friend by their nickname and returns their user object.
