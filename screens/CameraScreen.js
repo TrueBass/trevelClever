@@ -4,6 +4,7 @@ import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function CameraScreen({ navigation }) {
 
+  const [shouldAsk,setshouldAsk] = useState(true);
   const [hasPermission, requestPermission] = Camera.useCameraPermissions();
   const [isCameraActive, setIsCameraActive] = useState(false); 
   const [type, setType] = useState(CameraType.back);
@@ -11,9 +12,12 @@ export default function CameraScreen({ navigation }) {
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       setIsCameraActive(true);
+      if(shouldAsk){
+        requestPermission({shouldAsk});
+      }
     });
     return unsubscribe; 
-  }, [navigation]); 
+  }, [navigation,shouldAsk]); 
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('blur', () => {
@@ -23,10 +27,22 @@ export default function CameraScreen({ navigation }) {
   }, [navigation]);
 
   const handleRequestPermission = async () => {
-    const { status } = await requestPermission();
-    if (status !== 'granted') {
+    const { status } = await requestPermission({shouldAsk});
+    if (status === 'granted'){
+      setshouldAsk(false);
+      navigation.navigate('Camera');
+    }
+    else if (status !== 'granted') {
       console.warn('Camera permission not granted'); 
     }
+  };
+
+  const handleAskAgain = () => {
+    setShouldAsk(true);
+  };
+
+  const handleNeverAskAgain = () => {
+    setShouldAsk(false);
   };
 
   const toggleCameraType = () => {
@@ -44,7 +60,7 @@ export default function CameraScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {isCameraActive && (
+      {isCameraActive && hasPermission.granted &&(
         <Camera key={Date.now()} style={styles.camera} type={type}>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
