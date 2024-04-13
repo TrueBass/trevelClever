@@ -1,15 +1,26 @@
 import { React, useState } from "react";
-import {View,Text,StyleSheet,FlatList,Button} from "react-native";
+import {View,Text,StyleSheet,FlatList} from "react-native";
+import GroupItem from "../components/GroupItem";
 import AddRoundButton from '../components/AddRoundButton';
 
 function GroupsScreen(){
+    const[Groups,setGroups] = useState([]);
+    texct = 'hhh'
+    function AddGroupHandler(){
+        setGroups(currentAddingGroup => [...currentAddingGroup,{text: texct,key:Math.random().toString()}]);
+        console.log("....");
+    }
+    
     return(
         <View style={styles.container}>
             <View style={styles.groupListContainer}>
-                <Text>Gfgfgfg</Text>
+                <FlatList data={Groups} renderItem={(itemData) => {
+                    return <GroupItem text={itemData.text}/>;
+                }}/>
             </View>
+            
             <View style={styles.buttonContainer}>
-                <AddRoundButton/>
+                <AddRoundButton onPress={AddGroupHandler}/>
             </View>
         </View>
     );
@@ -27,6 +38,7 @@ groupListContainer:{
     borderWidth:1,
     borderColor: 'red'
 },
+
 buttonContainer:{
     flex:1,
     alignItems: 'center',

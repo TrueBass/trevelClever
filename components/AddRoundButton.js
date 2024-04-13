@@ -4,7 +4,7 @@ import { View, Text, Pressable, StyleSheet } from 'react-native';
 function AddRoundButton({onPress}){
   return (
     <View style={styles.roundButton}>
-      <Pressable style={({pressed}) => pressed?[styles.roundButton,styles.pressed]:styles.roundButton } onPress={onPress}>
+      <Pressable android_ripple={{color: '#210644'}} style={({pressed}) => pressed?[styles.roundButton,styles.pressed]:styles.roundButton } onPress={onPress}>
         <Text style={styles.plusIcon}>+</Text>
       </Pressable>
     </View>
