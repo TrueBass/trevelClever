@@ -9,8 +9,8 @@ import {
 
 import { LinearGradient } from 'expo-linear-gradient';
 import FlashMessage from 'react-native-flash-message';
-import {removeFriend} from "./models/test/";
-//import {updateGroupMembers} from './models/groupTest/';
+//import {removeFriend} from "./models/test/";
+import {getUserGroups} from './models/groupTest/';
 // custom components imports:
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
@@ -44,9 +44,9 @@ export default function App() {
     // there is only one screen we need to set.
     setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
-  const userId = "kec78HNqQeNNjTKJzQcLvwdHvFk2";
+  const userId = "BaJ6rgAelpfummrGipoNXQktip22";
   const groupId = "-NuS9gCXxn68T3i0X9wU";
-  removeFriend(userId, "-Nt_-3QMIQgtiOr-WFUl");
+  getUserGroups(userId);
   // getUserPhoto('test@gmail.com');
 
   return (

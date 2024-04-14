@@ -18,7 +18,38 @@ import {
 // import Transaction from './transactionsSchema';
 // import Group from './groupsSchema';
 // import { func } from 'prop-types';
+/**
+ * 
+ * @param {string} userUid 
+ * @returns user's nickname {string}, if the uid is correct
+ * \
+ * if user hasn't been found, returns null
+ */
+export async function getNick(userUid){
+  try{
+    const nickRef = ref(db, 'users/' + userUid + '/nickname');
+    const snapshot = await get(nickRef);
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch(error){
+    showMessage({
+      message: "Error finding user",
+      description: error.message || "Unknown error occurred",
+      type: "danger",
+      icon: { icon: "danger", position: "left" },
+      duration: 3000
+    });
+  }
+}
 
+
+export async function findUserByUid(userUid){
+  try{
+    const snapshot = await get(ref(db, "users/"+userUid+"/"));
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch(error){
+    console.error(error.message);
+  }
+}
 export async function addFriendId(userId, friendId) {
   try {
     const friendsRef = ref(db, `users/${userId}/friends/`);
@@ -61,50 +92,12 @@ export async function removeFriend(userId, friendId) {
       return Math.max(0, currentCount - 1);
     });
 
-    // Assuming the transaction was successful, we log the new count
     const newCountSnapshot = await get(numFriendRef);
     console.log("Friend count updated to: ", newCountSnapshot.val());
   } catch (error) {
     console.error("Error occurred while removing friend or updating count", error);
   }
 }
-// export async function removeFriendId(userId, friendId){
-//     // Reference to friend's ID under the user's friends list.
-//     const friendsRef = ref(db, "users/" + userId + "/friends/");
-//     const numFriendRef = ref(db, "users/" + userId + "/numFriends")
-    
-//     // Remove the friend's ID by setting the value to null.
-//     update(friendsRef, { [friendId]: null })
-//     .then(() => {
-//       console.log("Your friend was successfully removed.");
-//       get(numFriendRef)
-//         .then((snapshot) => {
-//           let newCount;
-//           if (snapshot.exists()) {
-//             const currentCount = snapshot.val();
-//             newCount = (currentCount || 1) - 1; // Ensure we have a number and do not go below 0
-//             if (newCount < 0) {
-//               newCount = 0; // Ensure we do not have negative friend counts
-//             }
-//           } else {
-//             newCount = 0; // If it doesn't exist or is already 0, keep it at 0
-//             console.log("numFriendRef does not exist or is already 0. Keeping friend count at 0.");
-//           }
-//           // Update the value directly using set
-//           set(numFriendRef, newCount).then(() => {
-//             console.log("Friend count updated to: ", newCount);
-//           }).catch((error) => {
-//             console.error("Error updating friend count", error);
-//           });
-//         })
-//         .catch((error) => {
-//           console.error("Error fetching numFriendRef", error);
-//         });
-//     })
-//     .catch((error) => {
-//       console.error("Error removing the friend", error.message);
-//     });
-// };
 
 /**
  * Finds a friend by their nickname and returns their user object.
