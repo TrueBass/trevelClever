@@ -1,14 +1,25 @@
 import { React, useState } from "react";
-import {View,Text,StyleSheet,FlatList} from "react-native";
+import {View,StyleSheet,FlatList} from "react-native";
 import GroupItem from "../components/GroupItem";
 import AddRoundButton from '../components/AddRoundButton';
+import GroupInput from "../components/GroupInput";
 
 function GroupsScreen(){
+    const [ModalIsVisible,setModalIsVisible] = useState(false);
     const[Groups,setGroups] = useState([]);
-    texct = 'hhh'
-    function AddGroupHandler(){
-        setGroups(currentAddingGroup => [...currentAddingGroup,{text: texct,key:Math.random().toString()}]);
-        console.log("....");
+
+    function startAddGroupHandler(){
+        setModalIsVisible(true);
+    }
+
+    function endAddGroupHandler(){
+        setModalIsVisible(false);
+    }
+    
+    function AddGroupHandler(NameGroup){
+        setGroups(currentAddingGroup => [...currentAddingGroup,{text:NameGroup ,key:Math.random().toString()}]);
+        //console.log("....");
+        endAddGroupHandler();
     }
     
     return(
@@ -20,7 +31,8 @@ function GroupsScreen(){
             </View>
             
             <View style={styles.buttonContainer}>
-                <AddRoundButton onPress={AddGroupHandler}/>
+                <AddRoundButton onPress={startAddGroupHandler}/>
+                <GroupInput visible={ModalIsVisible} onAddGroup={AddGroupHandler} onCancel={endAddGroupHandler}/>
             </View>
         </View>
     );
