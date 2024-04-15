@@ -12,16 +12,27 @@ import {
     getNick,
     addFriendId,
 } from '../models/test';
-import { get } from "firebase/database";
+import { get, ref } from "firebase/database";
 
 export default function FriendsScreen(){
 
     const [friendNickname, setFriendNickname] = useState('');
     const [currentUserUid, setCurrentUserUid] = useState(auth.currentUser.uid);
-    const [searchResultText, setSearchResultText] = useState(<Text style={{fontSize: 20, textAlign: 'center'}}>Try to find someone</Text>);
-    // const [friendsFlatList, setFriendsFlatList] = useState();
+    const [searchResultText, setSearchResultText] = useState(<Text style={styles.messageViewText}>Try to find someone</Text>);
     const [userFriendsListData, setUserFriendsListData] = useState([]);
-    const [numFriends, setNumFriends] = useState(0);
+
+    async function refreshFrendsList(){
+        const currentUser = await findUserByUid(currentUserUid);
+        const tempFriendsList = [];
+        if(currentUser?.friends && currentUser?.friends.length !== 0){
+            for (const id of Object.keys(currentUser?.friends)) {
+                const nickname = await getNick(id);
+                tempFriendsList.push({id, nickname});
+            }
+        }
+        setUserFriendsListData(tempFriendsList);
+        //setSearchResultText(<Text style={styles.messageViewText}>Oh My Days... U have no fliends😞</Text>);
+    }
 
     async function confirmButtonHandler(){
         if(friendNickname === ''){
@@ -37,7 +48,7 @@ export default function FriendsScreen(){
         const findRes = await findByNick(friendNickname);
         
         if(findRes)
-            setSearchResultText(<FriendTitle nickname={findRes.nickname} profilePhoto={findRes.profilePhotoUrl}/>);
+            setSearchResultText(<FriendTitle onPlusPress={addButtonHandler} nickname={findRes.nickname} profilePhoto={findRes.profilePhotoUrl}/>);
         else{
             setSearchResultText(<Text style={{fontSize: 20, textAlign: 'center'}}>There is no such friend...</Text>);
         }
@@ -56,28 +67,20 @@ export default function FriendsScreen(){
         }
 
         const foundUserFriend = await findByNick(friendNickname);
-        // if(!foundUserFriend)
-            // return;
+        if(!foundUserFriend)
+            return;
         
-        // await addFriendId(currentUserUid, foundUserFriend.userId);
-
-        const currentUser = await findUserByUid(currentUserUid);
+        await addFriendId(currentUserUid, foundUserFriend.userId);
         setFriendNickname('');
-
-        if(currentUser){
-            for (const id of Object.keys(currentUser.friends)) {
-                const nickname = await getNick(id);
-                if(!userFriendsListData.some(item=>item.id === id)){
-                    userFriendsListData.push({id, nickname: nickname});
-                }
-            }
-        }
     }
     
+    refreshFrendsList();
+
     return (
         <View style={styles.main}>
             <View style={styles.input}>
                 <InputField
+                    onSearch={confirmButtonHandler}
                     onChangeText={(text) => setFriendNickname(text.trim())}
                     placeholder={"input friend's nickname"}
                     value={friendNickname}
@@ -96,19 +99,11 @@ export default function FriendsScreen(){
                         }}
                         renderItem={({item}) =>
                             (<View style={{margin: 10}}>
-                                <FriendTitle friendId={item.id} nickname={item.nickname}/>
+                                <FriendTitle onRemove={refreshFrendsList} currentUserId={currentUserUid} friendId={item.id} nickname={item.nickname}/>
                             </View>)
                         }
                     />
                 </View>
-            </View>
-            <View style={styles.buttonView}>
-                <PrimaryButton onPress={confirmButtonHandler}>
-                    Confirm
-                </PrimaryButton>
-                <PrimaryButton onPress={addButtonHandler}>
-                    Add
-                </PrimaryButton>
             </View>
         </View>
     );
@@ -140,6 +135,10 @@ const styles = StyleSheet.create({
         // borderWidth:1,
         // borderColor: 'red',
     },
+    messageViewText: {
+        fontSize: 20,
+        textAlign: 'center'
+    },
     messageViewFlatList: {
         flex: 4,
         justifyContent: 'center',
@@ -149,14 +148,5 @@ const styles = StyleSheet.create({
         backgroundColor: '#a362cfff',
         // borderWidth:1,
         // borderColor: 'red',
-    },
-    buttonView: {
-        flex: 2,
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-        marginHorizontal: 20,
-        // borderWidth:1,
-        // borderColor: 'red',
-    },
+    }
 });

@@ -1,8 +1,9 @@
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
-import BinButton from "./BinButton";
+import CrossButton from './CrossButton';
+import AddRoundButton from './AddRoundButton';
 
-export default function FriendTitle({friendId, nickname, profilePhoto = null }) {
+export default function FriendTitle({ onRemove = null, currentUserId = null, friendId = null, nickname, profilePhoto = null, onPlusPress = null }) {
 
     return (
         <View style={styles.backGround}>
@@ -14,9 +15,15 @@ export default function FriendTitle({friendId, nickname, profilePhoto = null }) 
                 }
             </View>
             <View style={styles.text}>
-                <Text style={{ fontSize: 20 }}>{nickname}</Text>
+                <Text adjustsFontSizeToFit={true} style={{ fontSize: 20 }}>{nickname}</Text>
             </View>
-            <BinButton friendId={friendId}/>
+            <View style={{marginRight: 20}}>
+                {
+                    onPlusPress
+                    ? <AddRoundButton onPress={onPlusPress}/>
+                    : <CrossButton onRemove={onRemove} currentUserId={currentUserId} friendId={friendId}/>
+                }
+            </View>
         </View>
     );
 }
@@ -26,9 +33,9 @@ const styles = StyleSheet.create({
     backGround: {
         flex: 1,
         flexDirection: 'row',
-        justifyContent: 'flex-start',
+        justifyContent: 'space-between',
         alignItems: 'center',
-
+        maxHeight: 100,
         backgroundColor: '#bc86d7ff',
         borderRadius: 50,
         overflow: 'hidden',
@@ -40,14 +47,13 @@ const styles = StyleSheet.create({
         // flex: 1,
         // justifyContent: 'center',
         // alignItems: 'center',
-
         borderWidth: 3,
         borderColor: '#9552b6ff',
         borderRadius: 50,
         overflow: 'hidden'
     },
     text: {
-        // flex: 3,
-        marginLeft: 30,
+        // flex: 1,
+        // marginHorizontal: 30
     }
 });
