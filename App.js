@@ -44,9 +44,10 @@ export default function App() {
     // there is only one screen we need to set.
     setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
-  const userId = "BaJ6rgAelpfummrGipoNXQktip22";
-  const groupId = "-NuS9gCXxn68T3i0X9wU";
-  getUserGroups(userId);
+  
+  // const userId = "BaJ6rgAelpfummrGipoNXQktip22";
+  // const groupId = "-NuS9gCXxn68T3i0X9wU";
+  // getUserGroups(userId);
   // getUserPhoto('test@gmail.com');
 
   return (

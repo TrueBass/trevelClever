@@ -41,7 +41,6 @@ export async function getNick(userUid){
   }
 }
 
-
 export async function findUserByUid(userUid){
   try{
     const snapshot = await get(ref(db, "users/"+userUid+"/"));
@@ -103,10 +102,10 @@ export async function removeFriend(userId, friendId) {
  * Finds a friend by their nickname and returns their user object.
  * 
  * @param {string} findNick - The nickname of the friend to search for.
- * @returns {object} The user object of the found friend
- * \
- * \
- * if user hasn't been found, returns 400
+ * @return {object} The user object of the found friend
+ * 
+ * 
+ * if user hasn't been found, returns null
  * \
  * \
  * object contains the following properties:
@@ -123,17 +122,23 @@ export async function removeFriend(userId, friendId) {
  */
 export async function findByNick(findNick) {
   try{
-    const queryUserByNickname = query(UserRef, orderByChild('nickname'), equalTo(findNick));
+    const queryUserByNickname = query(ref(db,'users/'), orderByChild('nickname'), equalTo(findNick));
     const snapshot = await get(queryUserByNickname);
     
     if (snapshot.exists()) {
       const userUidObj = {};
-      userUidObj = 'a';
       userGet = snapshot.val();
       userUidObj.userId = Object.keys(userGet)[0]; // keys(): returns an array with one key we need (in this case)
       return Object.assign(userUidObj, userGet[userUidObj.userId]); // copying and returning an obj
     } else {
-      return 400; // if we didn't find a user
+      showMessage({
+        message: "Woops (0_0)",
+        description: "User hasn't been found...",
+        type: "warning",
+        duration: 3000,
+        icon: {icon: "warning", position: "left"}
+      });
+      return null; // if we didn't find a user
     }
   }
   catch (error) {

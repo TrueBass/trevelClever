@@ -1,5 +1,6 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
+import { showMessage } from "react-native-flash-message";
 
 import { InputField, PrimaryButton, FriendTitle } from "../components";
 
@@ -7,39 +8,77 @@ import { auth } from '../backend/config';
 
 import {
     findByNick,
+    findUserByUid,
+    getNick,
     addFriendId,
 } from '../models/test';
+import { get } from "firebase/database";
 
 export default function FriendsScreen(){
 
     const [friendNickname, setFriendNickname] = useState('');
     const [currentUserUid, setCurrentUserUid] = useState(auth.currentUser.uid);
-    const [searchResultText, setSearchResultText] = useState(<Text style={{fontSize: 20}}>Try to find someone</Text>);
-    const [friendsFlatList, setFriendsFlatList] = useState(<Text style={{fontSize: 20}}>Flipping twist💀 Where are ur friend?</Text>);
+    const [searchResultText, setSearchResultText] = useState(<Text style={{fontSize: 20, textAlign: 'center'}}>Try to find someone</Text>);
+    // const [friendsFlatList, setFriendsFlatList] = useState();
+    const [userFriendsListData, setUserFriendsListData] = useState([]);
+    const [numFriends, setNumFriends] = useState(0);
 
     async function confirmButtonHandler(){
-        // this is working great now
-        // because of async/await.
-        const resultUserObj = await findByNick(friendNickname.trim()); // code res: 400 - bad(
+        if(friendNickname === ''){
+            showMessage({
+                message: "Hej!",
+                description: "Input some text to seach...",
+                type: "warning",
+                duration: 3000,
+                icon: {position: "left", icon: "warning"},
+            });
+            return;
+        }
+        const findRes = await findByNick(friendNickname);
         
-        if(resultUserObj === 400)
-            setSearchResultText(<Text style={{fontSize: 20}}>There is no such friend...</Text>);
-        else
-            setSearchResultText(<FriendTitle nickname={resultUserObj.nickname} profilePhoto={resultUserObj.profilePhotoUrl}/>);
+        if(findRes)
+            setSearchResultText(<FriendTitle nickname={findRes.nickname} profilePhoto={findRes.profilePhotoUrl}/>);
+        else{
+            setSearchResultText(<Text style={{fontSize: 20, textAlign: 'center'}}>There is no such friend...</Text>);
+        }
     }
 
     async function addButtonHandler(){
-        // this handler not doing well
-        // but we'll fix it.
-        addFriendId(currentUserUid, userUidObj.userId);
+        if(friendNickname === ''){
+            showMessage({
+                message: "Hej!",
+                description: "Input some text to seach...",
+                type: "warning",
+                duration: 3000,
+                icon: {position: "left", icon: "warning"},
+            });
+            return;
+        }
+
+        const foundUserFriend = await findByNick(friendNickname);
+        // if(!foundUserFriend)
+            // return;
+        
+        // await addFriendId(currentUserUid, foundUserFriend.userId);
+
+        const currentUser = await findUserByUid(currentUserUid);
         setFriendNickname('');
+
+        if(currentUser){
+            for (const id of Object.keys(currentUser.friends)) {
+                const nickname = await getNick(id);
+                if(!userFriendsListData.some(item=>item.id === id)){
+                    userFriendsListData.push({id, nickname: nickname});
+                }
+            }
+        }
     }
     
     return (
         <View style={styles.main}>
             <View style={styles.input}>
                 <InputField
-                    onChangeText={(text) => setFriendNickname(text)}
+                    onChangeText={(text) => setFriendNickname(text.trim())}
                     placeholder={"input friend's nickname"}
                     value={friendNickname}
                 />
@@ -49,7 +88,18 @@ export default function FriendsScreen(){
                     {searchResultText}
                 </View>
                 <View style={styles.messageViewFlatList}>
-                    {friendsFlatList}
+                    <FlatList data={userFriendsListData} keyExtractor={item => item.id}
+                        ListHeaderComponent={()=>{return ( //maybe i'll delete this prop
+                            <View style={{alignItems: "center", marginTop: 10}}>
+                                <Text style={{fontSize: 20}}>Friends</Text>
+                            </View>);
+                        }}
+                        renderItem={({item}) =>
+                            (<View style={{margin: 10}}>
+                                <FriendTitle friendId={item.id} nickname={item.nickname}/>
+                            </View>)
+                        }
+                    />
                 </View>
             </View>
             <View style={styles.buttonView}>
@@ -70,7 +120,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
     },
     input: {
-        // flex: 1,
         marginHorizontal: 20,
         // borderWidth:1,
         // borderColor: 'red',
@@ -80,21 +129,22 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'stretch',
         marginHorizontal: 20,
-        marginVertical: 10,
         // borderWidth:1,
         // borderColor: 'red',
     },
     messageViewFriendInfo: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'stretch',
+        marginVertical: 10,
         // borderWidth:1,
         // borderColor: 'red',
     },
     messageViewFlatList: {
-        flex: 3,
+        flex: 4,
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'stretch',
+        marginBottom: 10,
         borderRadius: 16,
         backgroundColor: '#a362cfff',
         // borderWidth:1,
@@ -106,7 +156,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'baseline',
         marginHorizontal: 20,
-        borderWidth:1,
-        borderColor: 'red',
+        // borderWidth:1,
+        // borderColor: 'red',
     },
 });
