@@ -128,7 +128,20 @@ export async function removeGroup(userId, groupId) {
     }
 }
 
-//ADD new members
+/**
+ * Asynchronously updates the members of a specified group.
+ * 
+ * @param {string} userId - The unique ID of the user who owns the group.
+ * @param {string} groupId - The unique identifier of the group whose members are being updated.
+ * @param {string[]} memberIds - An array of user IDs that will be set as the members of the group.
+ * Note: maybe i will put a creator of the group on the [0] place
+ * This function updates the membership of the given group by setting the `memberIds`:true.
+ * 
+ * If the update is successful, a confirmation message is logged to the console.
+ * If an error occurs during the update, it logs an error message and the promise is rejected with the error.
+ * 
+ * @return {Promise<void>}
+ */
 export async function updateGroupMembers(userId, groupId, memberIds) {
     const membersUpdate = {};
     memberIds.forEach(memberId => {
@@ -142,7 +155,18 @@ export async function updateGroupMembers(userId, groupId, memberIds) {
       throw error; 
     }
 }
-//RETRIEVE the list of groups for a user
+/**
+ * Asynchronously retrieves the groups that a user is a part of.
+ *
+ * @param {string} userId - The unique ID of the user whose groups are being fetched.
+ * It uses an asynchronous request to get the groups data.
+ *
+ * If the groups data exists for the user, the function returns it as an object where each key
+ * represents a group ID the user is part of, and each value is `true` (indicating membership).
+ * Otherwise, an empty object is returned.
+ *
+ * @return {Promise<Object>}
+ */
 export async function getUserGroups(userId) {
   try {
     const userGroupsRef = ref(db, `users/${userId}/groups`);
@@ -158,7 +182,13 @@ export async function getUserGroups(userId) {
     throw error;
   }
 }
-//Make the goup inactive
+/**
+ * Asynchronously sets the active status of a user's group to FALSE to indicate that the group has paid all bills. 
+ * @param {string} userId - The unique ID of the user associated with the group.
+ * @param {string} groupId - The unique identifier of the group.
+ *
+ * @return {Promise<void>}
+ */
 export async function inactive(userId, groupId) {
   const groupActiveStatusRef = ref(db, `users/${userId}/groups/${groupId}/active`);
   try {
@@ -169,7 +199,23 @@ export async function inactive(userId, groupId) {
     throw error; 
   }
 }
-// Get group's fields (group snapshot)
+/**
+ * Asynchronously retrieves detailed data for a specific group belonging to a user.
+ *
+ * @param {string} userId - The unique ID of the user who is associated with the group.
+ * @param {string} groupId - The unique identifier of the group whose data is being retrieved.
+ *The data includes the active status, members, name, total spent amount, transactions, and group debts.
+ *
+ * The function returns an instance of the 'Groups' class populated with the group's data. If no group is found for the specified
+ * groupId, it logs a message to the console and returns null.
+ *
+ * Note: The 'Groups' class constructor expects the group's active status, members, name, total
+ * spent amount, transactions, and debts data in that order. Ensure that the 'Groups' class is
+ * defined and available in scope when using this method.
+ *
+ * @return {Promise<Groups|null>} A promise that resolves with an instance of the 'Groups' class
+ * containing the group's data, or null if the group does not exist.
+ */
 export async function getGroupSnapshot(groupId) {
   const groupRef = ref(db, `users/${userId}/groups/${groupId}/`);
   try {
