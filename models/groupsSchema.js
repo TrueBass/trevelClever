@@ -23,6 +23,7 @@
 //   }
   function Groups (active, members, name, totalSpent, transactions, groupDebts) {
       this.active = active; // Boolean indicating whether the group is active
+      this.master = members[0];
       this.members = members; // Object with userIds as keys and boolean values indicating membership
       this.name = name; // Name of the group
       this.totalSpent = totalSpent; // Total amount spent by the group

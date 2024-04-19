@@ -1,5 +1,5 @@
 import { db } from '../backend/config';
-
+import { showMessage } from "react-native-flash-message";
 import {
     ref,
     get,
@@ -24,7 +24,6 @@ import Groups from './groupsSchema/';
  *
  * After instantiation, the 'editGroup' function will push a unique ID with empty group. False status -> no transactions have been made.
  * 
- * Note: A creator is a default member
  * @return {Promise<void>} A promise that resolves if the update was successful, and rejects with an error if the update fails.
  */
 export const addGroup = async (userId) => {
@@ -32,7 +31,7 @@ export const addGroup = async (userId) => {
   try {
     // Add an auto-generated ID
     const newGroupsRef = push(groupsRef);
-    let newGroup = new Groups(false, null, null, null, null, null);
+    let newGroup = new Groups(false, {[userId]:true}, null, null, null, null);
     // Save the new group to the db
     await update(newGroupsRef, newGroup);
     console.log("Group created successfully.");
@@ -47,8 +46,9 @@ export const addGroup = async (userId) => {
  * @param {string} groupId - The unique ID of the group.
  * @param {Groups} newGroup - The new group data object to replace the existing group information.
  * 
- * Note: The 'newGroup' parameter should contain the new details for the group. The 'Groups' constructor is used here to create an object with a predefined structure. Use import Groups from 'your/path/models/groupsSchema/';
- *
+ * Note: The 'newGroup' parameter should contain the new details for the group. The 'Groups' constructor is used here to create an object with a predefined structure.
+ * Use import Groups from 'your/path/models/groupsSchema/';
+ * 1. active 2. master 3. members[id:true], 4. name, 5. totalSpent 6.  transactions, 7. groupDebts
  * @return {Promise<void>} A promise that resolves with no value when the group information is successfully updated, or rejects with an error if the update fails.
  */
 export async function editGroup(userId, groupId, newGroup){
@@ -129,11 +129,9 @@ export async function removeGroup(userId, groupId) {
 }
 
 /**
- * Asynchronously updates the members of a specified group.
- * 
  * @param {string} userId - The unique ID of the user who owns the group.
  * @param {string} groupId - The unique identifier of the group whose members are being updated.
- * @param {string[]} memberIds - An array of user IDs that will be set as the members of the group.
+ * @param {string[]} memberIds - An array of members IDs that will be set as the members of the group.
  * Note: maybe i will put a creator of the group on the [0] place
  * This function updates the membership of the given group by setting the `memberIds`:true.
  * 
@@ -183,19 +181,43 @@ export async function getUserGroups(userId) {
   }
 }
 /**
- * Asynchronously sets the active status of a user's group to FALSE to indicate that the group has paid all bills. 
  * @param {string} userId - The unique ID of the user associated with the group.
  * @param {string} groupId - The unique identifier of the group.
- *
+ *Asynchronously sets changes the active status of a user's group
+ *  ➔ to FALSE to indicate that the group has paid all bills. 
+ *    🐝 ONLY the master can disactivate a group
+ *  ➔ to TRUE to indecate that there are bills.
+ *    🐝 EVERY member can activate it
  * @return {Promise<void>}
  */
-export async function inactive(userId, groupId) {
-  const groupActiveStatusRef = ref(db, `users/${userId}/groups/${groupId}/active`);
+export async function toggleActiveState(userId, groupId) {
+  const groupRef = ref(db, `users/${userId}/groups/${groupId}/`);
   try {
-    await update(groupActiveStatusRef, { active: false });
-    console.log(`Group ${groupId} active state set to false for user ${userId}`);
+    const groupSnapshot = await get(groupRef);
+    if (groupSnapshot.exists()) {
+      const groupData = groupSnapshot.val();
+      console.log(groupData.master);
+      const master = groupData.master;
+      const activeState = groupData.active;
+      if (activeState === false || userId === master) {
+        const currentActiveState = Boolean(groupData.active); 
+        await update(groupRef, { active: !currentActiveState });
+        console.log(`Group ${groupId} active state toggled to ${!currentActiveState} for user ${userId}`);
+      } else {
+        showMessage({
+          message: "Sorry",
+          description: "Only the master can close bills",
+          type: "warning",
+          duration: 3000,
+          icon: { position: "left", icon: "warning" },
+        });
+        throw new Error(`User ${userId} is not authorized to change the active state of group ${groupId}`);
+      }
+    } else {
+      throw new Error(`Group ${groupId} does not exist for user ${userId}`);
+    }
   } catch (error) {
-    console.error(`Error while attempting to remove group '${groupId}': `, error.message);
+    console.error(`Error '${groupId}': `, error.message);
     throw error; 
   }
 }
@@ -236,5 +258,43 @@ export async function getGroupSnapshot(groupId) {
     }
   } catch (error) {
     console.error("Error getting group data:", error);
+  }
+}
+/**
+ * @param {string} userId - The ID of the owner.
+ * @param {string} groupId - The ID of the group.
+ * @param {string} memberId - The ID of the member to be deleted from the group.
+ *  ➔ a user (the master) cannot delete themselves from the group.
+ * @return {Promise<void>} A promise that resolves when the deletion is complete or rejects with an error.
+ */
+export async function deleteGroupMember(userId, groupId, memberId) {
+  const memberDelete = {};
+  // Set the member's value to null to delete it from the group
+  if (userId === memberId) {
+    showMessage({
+      message: "Error",
+      description: "You cannot delete the master",
+      type: "warning",
+      duration: 3000,
+      icon: { position: "left", icon: "warning" },
+    });
+    console.log("did you try to delete the master? ");
+  }
+  else {
+    memberDelete[`users/${userId}/groups/${groupId}/members/${memberId}`] = null;
+    try {
+      await update(ref(db), memberDelete);
+      console.log(`Member ${memberId} deleted successfully from group: ${groupId}.`);
+    } catch (error) {
+      showMessage({
+        message: "Error",
+        description: "We failed to delete a member",
+        type: "warning",
+        duration: 3000,
+        icon: { position: "left", icon: "warning" },
+      });
+      console.error(`Error deleting member ${memberId} from group: ${groupId}`, error.message);
+      throw error;
+    }
   }
 }
