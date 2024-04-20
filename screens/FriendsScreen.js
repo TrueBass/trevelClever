@@ -15,23 +15,27 @@ import {
 import { get, ref } from "firebase/database";
 
 export default function FriendsScreen(){
-
     const [friendNickname, setFriendNickname] = useState('');
     const [currentUserUid, setCurrentUserUid] = useState(auth.currentUser.uid);
     const [searchResultText, setSearchResultText] = useState(<Text style={styles.messageViewText}>Try to find someone</Text>);
     const [userFriendsListData, setUserFriendsListData] = useState([]);
+    const [isFriendsListChanged, setIsFriendsListChanged] = useState(true);
 
-    async function refreshFrendsList(){
-        const currentUser = await findUserByUid(currentUserUid);
-        const tempFriendsList = [];
-        if(currentUser?.friends && currentUser?.friends.length !== 0){
-            for (const id of Object.keys(currentUser?.friends)) {
-                const nickname = await getNick(id);
-                tempFriendsList.push({id, nickname});
+    async function refreshFriendsList(){
+        if(isFriendsListChanged){
+            const currentUser = await findUserByUid(currentUserUid);
+            const tempFriendsList = [];
+            if(currentUser?.friends && currentUser?.friends.length !== 0){
+                for (const id of Object.keys(currentUser?.friends)) {
+                    const nickname = await getNick(id);
+                    tempFriendsList.push({id, nickname});
+                }
+            } else {
+                setSearchResultText(<Text style={styles.messageViewText}>Oh My Days... U have no fliends😞</Text>);
             }
+            setUserFriendsListData(tempFriendsList);
+            setIsFriendsListChanged(false);
         }
-        setUserFriendsListData(tempFriendsList);
-        //setSearchResultText(<Text style={styles.messageViewText}>Oh My Days... U have no fliends😞</Text>);
     }
 
     async function confirmButtonHandler(){
@@ -47,8 +51,9 @@ export default function FriendsScreen(){
         }
         const findRes = await findByNick(friendNickname);
         
-        if(findRes)
+        if(findRes){
             setSearchResultText(<FriendTitle onPlusPress={addButtonHandler} nickname={findRes.nickname} profilePhoto={findRes.profilePhotoUrl}/>);
+        }
         else{
             setSearchResultText(<Text style={{fontSize: 20, textAlign: 'center'}}>There is no such friend...</Text>);
         }
@@ -69,12 +74,15 @@ export default function FriendsScreen(){
         const foundUserFriend = await findByNick(friendNickname);
         if(!foundUserFriend)
             return;
-        
+
         await addFriendId(currentUserUid, foundUserFriend.userId);
+        setIsFriendsListChanged(true);
         setFriendNickname('');
     }
     
-    refreshFrendsList();
+    if(isFriendsListChanged) {
+        refreshFriendsList();
+    }
 
     return (
         <View style={styles.main}>
@@ -84,6 +92,7 @@ export default function FriendsScreen(){
                     onChangeText={(text) => setFriendNickname(text.trim())}
                     placeholder={"input friend's nickname"}
                     value={friendNickname}
+                    returnKeyType="search"
                 />
             </View>
             <View style={styles.messageView}>
@@ -92,16 +101,16 @@ export default function FriendsScreen(){
                 </View>
                 <View style={styles.messageViewFlatList}>
                     <FlatList data={userFriendsListData} keyExtractor={item => item.id}
-                        ListHeaderComponent={()=>{return ( //maybe i'll delete this prop
-                            <View style={{alignItems: "center", marginTop: 10}}>
-                                <Text style={{fontSize: 20}}>Friends</Text>
+                        // ListHeaderComponent={()=>{return ( //maybe i'll delete this prop
+                        //     <View style={{alignItems: "center", marginTop: 10}}>
+                        //         <Text style={{fontSize: 20}}>Friends</Text>
+                        //     </View>);
+                        // }}
+                        renderItem={({item}) => {
+                            return (<View style={{margin: 10}}>
+                                <FriendTitle onRemove={setIsFriendsListChanged} currentUserId={currentUserUid} friendId={item.id} nickname={item.nickname}/>
                             </View>);
                         }}
-                        renderItem={({item}) =>
-                            (<View style={{margin: 10}}>
-                                <FriendTitle onRemove={refreshFrendsList} currentUserId={currentUserUid} friendId={item.id} nickname={item.nickname}/>
-                            </View>)
-                        }
                     />
                 </View>
             </View>

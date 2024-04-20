@@ -6,7 +6,7 @@ export default function CrossButton({onRemove=null, currentUserId, friendId}){
 
     async function removeFriendHandler(){
         await removeFriend(currentUserId,friendId);
-        await onRemove();
+        onRemove && onRemove(true);
     }
 
     return (<View>
