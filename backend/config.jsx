@@ -1,4 +1,5 @@
 import {initializeApp} from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 import { getDatabase, ref, update, equalTo, get } from "@firebase/database";
 import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,4 +26,5 @@ export const auth = initializeAuth(app, {
 // auth and db variables need to put user's values
 // to the Realtime db and Authentication
 export const db = getDatabase();
+export const fs = getFirestore();
 // export const db = firebaseConfig.database();
