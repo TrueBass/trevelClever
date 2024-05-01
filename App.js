@@ -6,11 +6,11 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-
 import { LinearGradient } from 'expo-linear-gradient';
 import FlashMessage from 'react-native-flash-message';
-//import {removeFriend} from "./models/test/";
-import {getUserGroups} from './models/groupTest/';
+
+ import Groups from './models/groupsSchema/';
+ import {getGroupSnapshot} from './models/groupTest/';
 // custom components imports:
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
@@ -45,9 +45,26 @@ export default function App() {
     setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
   
-  // const userId = "BaJ6rgAelpfummrGipoNXQktip22";
-  // const groupId = "-NuS9gCXxn68T3i0X9wU";
-  // getUserGroups(userId);
+   const userId = "BaJ6rgAelpfummrGipoNXQktip22";
+   const groupId = "Vkmi1FGzOSCpKBMB5969";
+   const membersIds = ["-Nt_-3QPI1v-utxL1Tuh", "bqaGaKAbumXDIVZyVayLJTbxPdY2"];
+   async function someFunction(groupId) { // Ensure groupId is passed as an argument
+    try {
+      const list = await getGroupSnapshot(groupId);
+      if (list instanceof Groups) {
+        console.log("list ret:", list);
+      } else {
+        console.log("no   -> ", list);
+      }
+    } catch (error) {
+      console.error('Error getting user groups:', error);
+    }
+  }
+
+  someFunction();
+
+
+
   // getUserPhoto('test@gmail.com');
 
   return (

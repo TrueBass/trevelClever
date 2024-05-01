@@ -28,6 +28,6 @@
       this.name = name; // Name of the group
       this.totalSpent = totalSpent; // Total amount spent by the group
       this.transactions = transactions; // Object containing transaction details with transactionIds as keys
-      this.groupDebts = groupDebts; // Object containing group debts with gDebtIds as keys
+      this.groupDebts = groupDebts; //????  Object containing group debts with gDebtIds as keys
     }
 export default Groups;

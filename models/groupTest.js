@@ -1,40 +1,31 @@
-import { db } from '../backend/config';
+import { db, fs } from '../backend/config';
 import { showMessage } from "react-native-flash-message";
 import {
     ref,
     get,
     update,
-    query,
-    remove,
-    equalTo,
-    child,
-    push,
-    set,
-    orderByChild,
 } from "@firebase/database";
+import { collection, addDoc, updateDoc, getDoc, getDocs, deleteDoc, arrayUnion, where, doc, getFirestore, query} from 'firebase/firestore';
 import Groups from './groupsSchema/';
 /**
- * Updates a group's details for a specific user in the Firebase Realtime Database.
+ * Creates a group for a specific user in the Firestore. ➥ Returns groupId
  * 
  * @param {string} userId - The unique ID of the user who owns the group.
- * @param {string} groupId - The identifier of the group to be updated.
- * @param {Groups} newGroup - The new group data to be updated. Expected to be an instance of the Groups class.
  * 
  * Note: The 'Groups' constructor is used here to create an object with a predefined structure. Use import Groups from 'your/path/models/groupsSchema/';
  *
- * After instantiation, the 'editGroup' function will push a unique ID with empty group. False status -> no transactions have been made.
- * 
- * @return {Promise<void>} A promise that resolves if the update was successful, and rejects with an error if the update fails.
+ * @return {Promise<void>} groupId if successful
  */
 export const addGroup = async (userId) => {
-  const groupsRef = ref(db, `users/${userId}/groups/`);
   try {
-    // Add an auto-generated ID
-    const newGroupsRef = push(groupsRef);
-    let newGroup = new Groups(false, {[userId]:true}, null, null, null, null);
-    // Save the new group to the db
-    await update(newGroupsRef, newGroup);
-    console.log("Group created successfully.");
+    // Reference to Firestore collection
+    const groupsRef = collection(fs, `groups`);
+    // Create a new group instance
+    let newGroup = new Groups(false, [userId], null, null, null, null, null);
+    // Add a new document with an auto-generated ID
+    const docRef = await addDoc(groupsRef, Object.assign({}, newGroup));
+    console.log("Group created successfully with ID:", docRef.id);
+    return docRef.id;
   } catch (error) {
     console.error("Error performing database operation:", error.message);
   }
@@ -51,11 +42,13 @@ export const addGroup = async (userId) => {
  * 1. active 2. master 3. members[id:true], 4. name, 5. totalSpent 6.  transactions, 7. groupDebts
  * @return {Promise<void>} A promise that resolves with no value when the group information is successfully updated, or rejects with an error if the update fails.
  */
-export async function editGroup(userId, groupId, newGroup){
-    //newGroup = new Groups(true, {"kec78HNqQeNNjTKJzQcLvwdHvFk2": true}, "Hole", null, null, null);// for etit group function
-    const groupRef = ref(db, `users/${userId}/groups/${groupId}`);
-    try {
-    await update(groupRef, newGroup);
+export async function editGroup(groupId, newGroup) {
+  // Reference to Firestore document
+  const groupDocRef = doc(fs, `groups/${groupId}`);
+
+  try {
+    // Update the existing group document
+    await updateDoc(groupDocRef, Object.assign({}, newGroup));
     console.log('Group information updated successfully.');
   } catch (error) {
     console.error('Error updating group information:', error.message);
@@ -78,23 +71,22 @@ export async function editGroup(userId, groupId, newGroup){
  * 
  * @return {Promise<void>} A promise that resolves without a value if the group name is successfully updated, or rejects with an error if the update fails.
  */
-export async function editGroupName(userId, groupId, newName){
-    const groupRef = ref(db, `users/${userId}/groups/${groupId}`);
-    const updates = {
-        name: newName 
-      };
-      try {
-        await update(groupRef, updates);
-        console.log(`Group name updated successfully to '${newName}' for group: ${groupId}`);
-      } catch (error) {
-        console.error(`Error updating group name for group: ${groupId}`, error.message);
-        throw error; 
-      }
+export async function editGroupName(groupId, newName) {
+  // Reference to Firestore document
+  const groupDocRef = doc(fs, `groups/${groupId}`);
+  try {
+    await updateDoc(groupDocRef, { name: newName });
+    console.log(`Group name updated successfully to '${newName}' for group: ${groupId}`);
+  } catch (error) {
+    console.error(`Error updating group name for group: ${groupId}`, error.message);
+    throw error; 
+  }
 }
 /**
- * Removes a specified group from the Firebase under the condition that all the transactions are closed.
- * 
- * @param {string} userId - The unique ID of the user who owns the group.
+ * Removes a specified group from the Firebase under the conditions:
+ *    1) that all the transactions are closed
+ *    2) the user is a master.
+ * @param {string} userId - The unique ID of the user.
  * @param {string} groupId - The unique identifier of the group to be removed.
  * 
  * If the group exists and the `active` flag within its data is set to `false`, it proceeds to remove the group
@@ -106,30 +98,55 @@ export async function editGroupName(userId, groupId, newName){
  * The promise rejects with an error if there's an issue with reading the group data or removing the group from the database.
  */
 export async function removeGroup(userId, groupId) {
-    const groupRef = ref(db, `users/${userId}/groups/${groupId}`);
-    try {
-      // First, get the group data to check the `active` flag
-      const groupSnapshot = await get(groupRef);
-      if (groupSnapshot.exists()) {
-        const groupData = groupSnapshot.val();
-        // Check if the `active` flag is `false` before proceeding with removal
+  // Reference to Firestore document
+  const groupDocRef = doc(fs, `groups/${groupId}`);
+
+  try {
+    const groupSnapshot = await getDoc(groupDocRef);
+    if (groupSnapshot.exists()) {
+      const groupData = groupSnapshot.data();
+      // Check if the `active` flag is `false` before proceeding with removal
+      if(groupData.master === userId){
         if (groupData.active === false) {
-          await remove(groupRef);
+          await deleteDoc(groupDocRef);
+          showMessage({
+            message: "Success",
+            description: "Inactive group has been removed successfully",
+            type:"success",
+            duration: 3000,
+            icon: { position: "left", icon: "success" },
+          });
           console.log(`Inactive group '${groupId}' has been removed successfully.`);
         } else {
           console.log(`Group '${groupId}' is active and will not be removed.`);
+          showMessage({
+            message: "Warning",
+            description: "Group is alive and will not be removed",
+            type:"warning",
+            duration: 3000,
+            icon: { position: "left", icon: "warning" },
+          });
         }
-      } else {
-        console.log(`Group '${groupId}' does not exist.`);
       }
-    } catch (error) {
-      console.error(`Error while attempting to remove group '${groupId}': `, error.message);
-      throw error; 
-    }
-}
+      else{
+        showMessage({
+          message: "Warning",
+          description: "Group has another master",
+          type:"warning",
+          duration: 3000,
+          icon: { position: "left", icon: "warning" },
+        });
+      }
 
+    } else {
+      console.log(`Group '${groupId}' does not exist.`);
+    }
+  } catch (error) {
+    console.error(`Error while attempting to remove group '${groupId}': `, error.message);
+    throw error; 
+  }
+}
 /**
- * @param {string} userId - The unique ID of the user who owns the group.
  * @param {string} groupId - The unique identifier of the group whose members are being updated.
  * @param {string[]} memberIds - An array of members IDs that will be set as the members of the group.
  * Note: maybe i will put a creator of the group on the [0] place
@@ -140,46 +157,56 @@ export async function removeGroup(userId, groupId) {
  * 
  * @return {Promise<void>}
  */
-export async function updateGroupMembers(userId, groupId, memberIds) {
-    const membersUpdate = {};
-    memberIds.forEach(memberId => {
-      membersUpdate[`users/${userId}/groups/${groupId}/members/${memberId}`] = true;
-    });
-    try {
-      await update(ref(db), membersUpdate);
-      console.log(`Group members updated successfully for group: ${groupId}.`);
-    } catch (error) {
-      console.error(`Error updating group members for group: ${groupId}`, error.message);
-      throw error; 
-    }
-}
-/**
- * Asynchronously retrieves the groups that a user is a part of.
- *
- * @param {string} userId - The unique ID of the user whose groups are being fetched.
- * It uses an asynchronous request to get the groups data.
- *
- * If the groups data exists for the user, the function returns it as an object where each key
- * represents a group ID the user is part of, and each value is `true` (indicating membership).
- * Otherwise, an empty object is returned.
- *
- * @return {Promise<Object>}
- */
-export async function getUserGroups(userId) {
+export async function updateGroupMembers(groupId, memberIds) {
+  // Reference to Firestore document
+  const groupDocRef = doc(fs, `groups/${groupId}`);
+
   try {
-    const userGroupsRef = ref(db, `users/${userId}/groups`);
-    const snapshot = await get(userGroupsRef);
-    if (snapshot.exists()) {
-      return snapshot.val(); 
-    } else {
-      console.log('User is not part of any groups.');
-      return {};
-    }
+    // Firestore transaction for adding members to the array
+    await updateDoc(groupDocRef, {
+      members: arrayUnion(...memberIds)
+    });
+    console.log(`Group members updated successfully for group: ${groupId}.`);
   } catch (error) {
-    console.error('Error fetching user groups:', error);
-    throw error;
+    console.error(`Error updating group members for group: ${groupId}`, error.message);
+    throw error; 
   }
 }
+
+/**
+ * Asynchronously retrieves the list of group IDs that a user is a part of, 
+ *                                                      either as the master or as a member.
+ *
+ * @param {string} userId - The unique ID of the user whose groups are being fetched.
+ * This function performs asynchronous requests to query the Firestore database for groups where the user
+ * is either the 'master' or listed within 'members' of the group.
+ *
+ * It fetches two sets of groups: one where the user is the master and another where the user is a member.
+ * The results of these queries are combined, and the unique group IDs are extracted and returned.
+ *
+ * @return {Promise<Array<string>>} A promise that resolves to an array of group IDs where the user is
+ * either a master or a member. If an error occurs during the operation, the promise rejects with an
+ * error message.
+ */
+export async function getUserGroups(userId) {
+    const fs = getFirestore(); // Initialize Firestore instance
+    const groupsCollectionRef = collection(fs, 'groups');
+    const q = await query(groupsCollectionRef,
+    where('master', '==', userId));
+    const groups = await getDocs(q);
+    const memberQuery = query(groupsCollectionRef, where('members', 'array-contains', userId));
+    const groups2 = await getDocs(memberQuery);
+    
+  try {
+    const combinedList = [...groups.docs, ...groups2.docs];
+    const returnGroupIds = combinedList.map(group => group.id);
+    return returnGroupIds;
+  }catch (error) {
+    console.error('Errore');
+  } 
+}
+
+
 /**
  * @param {string} userId - The unique ID of the user associated with the group.
  * @param {string} groupId - The unique identifier of the group.
@@ -191,37 +218,37 @@ export async function getUserGroups(userId) {
  * @return {Promise<void>}
  */
 export async function toggleActiveState(userId, groupId) {
-  const groupRef = ref(db, `users/${userId}/groups/${groupId}/`);
+  const groupDocRef = doc(fs, `groups/${groupId}`);
   try {
-    const groupSnapshot = await get(groupRef);
+    const groupSnapshot = await getDoc(groupDocRef);
     if (groupSnapshot.exists()) {
-      const groupData = groupSnapshot.val();
+      const groupData = groupSnapshot.data();
       console.log(groupData.master);
       const master = groupData.master;
       const activeState = groupData.active;
       if (activeState === false || userId === master) {
-        const currentActiveState = Boolean(groupData.active); 
-        await update(groupRef, { active: !currentActiveState });
+        const currentActiveState = Boolean(groupData.active);
+        await updateDoc(groupDocRef, { active: !currentActiveState });
         console.log(`Group ${groupId} active state toggled to ${!currentActiveState} for user ${userId}`);
       } else {
         showMessage({
           message: "Sorry",
-          description: "Only the master can close bills",
+          description: "Only the master can toggle the active state",
           type: "warning",
           duration: 3000,
           icon: { position: "left", icon: "warning" },
         });
-        throw new Error(`User ${userId} is not authorized to change the active state of group ${groupId}`);
       }
     } else {
       throw new Error(`Group ${groupId} does not exist for user ${userId}`);
     }
   } catch (error) {
-    console.error(`Error '${groupId}': `, error.message);
-    throw error; 
+    throw error;
   }
 }
+
 /**
+ * DOES NOT WORK
  * Asynchronously retrieves detailed data for a specific group belonging to a user.
  *
  * @param {string} userId - The unique ID of the user who is associated with the group.
@@ -238,28 +265,30 @@ export async function toggleActiveState(userId, groupId) {
  * @return {Promise<Groups|null>} A promise that resolves with an instance of the 'Groups' class
  * containing the group's data, or null if the group does not exist.
  */
-export async function getGroupSnapshot(groupId) {
-  const groupRef = ref(db, `users/${userId}/groups/${groupId}/`);
-  try {
-    const snapshot = await get(groupRef);
-    if (snapshot.exists()) {
-      const groupData = snapshot.val();
-      return new Groups(
-        groupData.active,
-        groupData.members,
-        groupData.name,
-        groupData.totalSpent,
-        groupData.transactions,
-        groupData.groupDebts
-      );
-    } else {
-      console.log("No group found for the specified groupId:", groupId);
-      return null; // or you can throw an error or handle this case as you see fit
-    }
-  } catch (error) {
-    console.error("Error getting group data:", error);
-  }
-}
+// export async function getGroupSnapshot(groupId) {
+//   const groupDocRef = doc(fs, 'groups', groupId)
+//   try {
+//     const snapshot = await getDoc(groupDocRef);
+//     if (snapshot.exists()) {
+//       const groupData = snapshot.data();
+//       console.log("Data: ", groupData);
+//       // return new Groups(
+//       //   groupData.active,
+//       //   groupData.members,
+//       //   groupData.name,
+//       //   groupData.totalSpent,
+//       //   groupData.transactions,
+//       //   groupData.groupDebts
+//       // );
+//     } else {
+//       console.log("No group found ", groupId);
+//       //return null; // or you can throw an error or handle this case as you see fit
+//     }
+//   } catch (error) {
+//     console.error("Error 1 getting group data:", error);
+//   }
+// }
+
 /**
  * @param {string} userId - The ID of the owner.
  * @param {string} groupId - The ID of the group.
@@ -281,7 +310,7 @@ export async function deleteGroupMember(userId, groupId, memberId) {
     console.log("did you try to delete the master? ");
   }
   else {
-    memberDelete[`users/${userId}/groups/${groupId}/members/${memberId}`] = null;
+    memberDelete[`groups/${groupId}/members/${memberId}`] = null;
     try {
       await update(ref(db), memberDelete);
       console.log(`Member ${memberId} deleted successfully from group: ${groupId}.`);
