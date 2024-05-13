@@ -1,10 +1,5 @@
-import { db, fs } from '../backend/config';
+import { fs } from '../backend/config';
 import { showMessage } from "react-native-flash-message";
-import {
-    ref,
-    get,
-    update,
-} from "@firebase/database";
 import { collection, addDoc, updateDoc, getDoc, getDocs, deleteDoc, arrayUnion, where, doc, getFirestore, query} from 'firebase/firestore';
 import Groups from './groupsSchema/';
 /**
@@ -248,15 +243,13 @@ export async function toggleActiveState(userId, groupId) {
 }
 
 /**
- * DOES NOT WORK
  * Asynchronously retrieves detailed data for a specific group belonging to a user.
  *
- * @param {string} userId - The unique ID of the user who is associated with the group.
  * @param {string} groupId - The unique identifier of the group whose data is being retrieved.
  *The data includes the active status, members, name, total spent amount, transactions, and group debts.
  *
  * The function returns an instance of the 'Groups' class populated with the group's data. If no group is found for the specified
- * groupId, it logs a message to the console and returns null.
+ * groupId, it console.logs a message and returns null.
  *
  * Note: The 'Groups' class constructor expects the group's active status, members, name, total
  * spent amount, transactions, and debts data in that order. Ensure that the 'Groups' class is
@@ -265,29 +258,29 @@ export async function toggleActiveState(userId, groupId) {
  * @return {Promise<Groups|null>} A promise that resolves with an instance of the 'Groups' class
  * containing the group's data, or null if the group does not exist.
  */
-// export async function getGroupSnapshot(groupId) {
-//   const groupDocRef = doc(fs, 'groups', groupId)
-//   try {
-//     const snapshot = await getDoc(groupDocRef);
-//     if (snapshot.exists()) {
-//       const groupData = snapshot.data();
-//       console.log("Data: ", groupData);
-//       // return new Groups(
-//       //   groupData.active,
-//       //   groupData.members,
-//       //   groupData.name,
-//       //   groupData.totalSpent,
-//       //   groupData.transactions,
-//       //   groupData.groupDebts
-//       // );
-//     } else {
-//       console.log("No group found ", groupId);
-//       //return null; // or you can throw an error or handle this case as you see fit
-//     }
-//   } catch (error) {
-//     console.error("Error 1 getting group data:", error);
-//   }
-// }
+export async function getGroupSnapshot(groupId) {
+  const groupDocRef = doc(fs, `groups/${groupId}`)
+  try {
+    const snapshot = await getDoc(groupDocRef);
+    if (snapshot.exists()) {
+      const groupData = snapshot.data();
+      console.log("Data: ", groupData);
+      return new Groups(
+        groupData.active,
+        groupData.members,
+        groupData.name,
+        groupData.totalSpent,
+        groupData.transactions,
+        groupData.groupDebts
+      );
+    } else {
+      console.log("No snapshot excists: ", groupId);
+      return null; // or you can throw an error or handle this case as you see fit
+    }
+  } catch (error) {
+    console.error("Error getDoc group data:", error);
+  }
+}
 
 /**
  * @param {string} userId - The ID of the owner.
@@ -296,34 +289,45 @@ export async function toggleActiveState(userId, groupId) {
  *  ➔ a user (the master) cannot delete themselves from the group.
  * @return {Promise<void>} A promise that resolves when the deletion is complete or rejects with an error.
  */
-export async function deleteGroupMember(userId, groupId, memberId) {
-  const memberDelete = {};
-  // Set the member's value to null to delete it from the group
-  if (userId === memberId) {
-    showMessage({
-      message: "Error",
-      description: "You cannot delete the master",
-      type: "warning",
-      duration: 3000,
-      icon: { position: "left", icon: "warning" },
-    });
-    console.log("did you try to delete the master? ");
-  }
-  else {
-    memberDelete[`groups/${groupId}/members/${memberId}`] = null;
-    try {
-      await update(ref(db), memberDelete);
-      console.log(`Member ${memberId} deleted successfully from group: ${groupId}.`);
-    } catch (error) {
+export async function deleteGroupMember(groupId, memberId) {
+  const groupDocRef = doc(fs, `groups/${groupId}`);
+  const snapic = await getDoc(groupDocRef)
+  let masterId = ""
+  let membersList= []
+  if(snapic.exists()){
+    const snapicData = snapic.data()
+    masterId = snapicData.master
+    membersList = snapicData.members
+
+    if (masterId === memberId) {
       showMessage({
         message: "Error",
-        description: "We failed to delete a member",
+        description: "You cannot delete the master",
         type: "warning",
         duration: 3000,
         icon: { position: "left", icon: "warning" },
       });
-      console.error(`Error deleting member ${memberId} from group: ${groupId}`, error.message);
-      throw error;
+    } else {
+      try {
+        await updateDoc(memberDocRef, {
+          deleted: firestore.FieldValue.delete()
+        });
+        console.log(`Member ${memberId} deleted successfully from group: ${groupId}.`);
+      } catch (error) {
+        showMessage({
+          message: "Error",
+          description: "We failed to delete a member",
+          type: "warning",
+          duration: 3000,
+          icon: { position: "left", icon: "warning" },
+        });
+        console.error(`Error deleting member ${memberId} from group: ${groupId}`, error.message);
+        throw error;
+      }
     }
   }
+ else{
+  console.log("No snapshot excists: ", groupId);
+ }
+  
 }
