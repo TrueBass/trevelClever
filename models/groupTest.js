@@ -264,7 +264,6 @@ export async function getGroupSnapshot(groupId) {
     const snapshot = await getDoc(groupDocRef);
     if (snapshot.exists()) {
       const groupData = snapshot.data();
-      console.log("Data: ", groupData);
       return new Groups(
         groupData.active,
         groupData.members,

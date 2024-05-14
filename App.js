@@ -48,20 +48,20 @@ export default function App() {
    const userId = "BaJ6rgAelpfummrGipoNXQktip22";
    const groupId = "Vkmi1FGzOSCpKBMB5969";
    const membersIds = ["-Nt_-3QPI1v-utxL1Tuh", "bqaGaKAbumXDIVZyVayLJTbxPdY2"];
-   async function someFunction(groupId) { // Ensure groupId is passed as an argument
-    try {
-      const list = await getGroupSnapshot(groupId);
-      if (list instanceof Groups) {
-        console.log("list ret:", list);
-      } else {
-        console.log("no   -> ", list);
-      }
-    } catch (error) {
-      console.error('Error getting user groups:', error);
-    }
-  }
+  //  async function someFunction(groupId) { // Ensure groupId is passed as an argument
+  //   try {
+  //     const list = await getGroupSnapshot(groupId);
+  //     if (list instanceof Groups) {
+  //       console.log("list ret:", list);
+  //     } else {
+  //       console.log("no   -> ", list);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error getting user groups:', error);
+  //   }
+  //}
 
-  someFunction();
+  //someFunction();
 
 
 
