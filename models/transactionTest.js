@@ -9,13 +9,16 @@ export function getLocalTime(){
   return localTimestamp;
 }
 /**
- * Creates a group for a specific user in the Firestore. ➥ Returns groupId
+ * Adds a new bill to the transactions collection.
  * 
- * @param {string} userId - The unique ID of the user who owns the group.
+ * Before adding to Firestore, this function converts the `tAccount` property from a Map
+ * to an object;
  * 
- * Note: The 'Groups' constructor is used here to create an object with a predefined structure. Use import Groups from 'your/path/models/groupsSchema/';
- *
- * @return {Promise<void>} groupId if successful
+ * @param {Object} newBill - The Transactions1 instance.
+ *   Expected to have a `tAccount` property which is a Map of user IDs to their respective debt,
+ *   which will be converted to an object before storing in the database.
+ * @returns {Promise<string|undefined>} A promise that resolves to the new document ID if successful,
+ *   or `undefined` if the operation fails.
  */
 export const addBill = async (newBill) => {
     try {

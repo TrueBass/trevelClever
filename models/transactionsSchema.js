@@ -22,12 +22,17 @@
 
 
 /**
- * @param {int} sType - 0: equal or 1:custom values
+ * Creates a new instance representing a group transaction.
  * 
- * @param {array} tAccount map of keys=billMembers IDs and values=null
- * note: when tSplitType is 1 (custom values), can have a number or null. Number - indicates specific debt, like 0 or 10 zł, whereas Null indicates that the user delegates calculations to us.
- *
- * @return {Promise<void>} groupId if successful
+ * NOTE: it includes a Map to keep track of each member's share of the payment (initially set to null).
+ * 
+ * @param {number} timestamp - use function getLocalTime() from ./models/transactionTest/
+ * @param {string} groupId - The ID of the group associated with the transaction.
+ * @param {string} whoPayed - The ID of the member who paid.
+ * @param {Array<string>} billMembers - Array of member IDs involved in the transaction.
+ * @param {number} amount - The total amount paid.
+ * @param {string} currencyF - The currency of the amount.
+ * @param {number} sType - The split type (0 for equal, 1 for custom).
  */
 export function Transactions1 (timestamp, groupId, whoPayed, billMembers, amount, currencyF, sType) {
     this.date = timestamp; // local timestamp
@@ -40,13 +45,17 @@ export function Transactions1 (timestamp, groupId, whoPayed, billMembers, amount
     this.tPayment = [amount, currencyF]; // Name of the group
     this.tSplitType = sType; 
   }
-  /**
-   * @param {int} tempTrans - transactions instance. Note: assumed it was created by Transactions1;
-   * 
-   * @param {array} debtsForMem length MUST align to tAccount keys
-   *
-   * @return {Promise<void>} groupId if successful
-   */
+/**
+ * Updates the transaction splitting logic based on split type.
+ * 
+ * ⛵️ For split type 0 (equal splitting), it divides the total payment
+ * equally among all members and updates their respective debt in the tAccount Map.
+ * 🚤 For split type 1 (custom split), it assigns custom debt values to each member
+ * and distributes any remainder equally among members who didn't have a pre-set debt.
+ * 
+ * @param {Object} bill - The bill object containing transaction details.
+ * @param {Array<number|null>} debtsForMem - Array of debt amounts for each member, or null if no pre-set debt.
+ */
   export function updateTransaction2 (bill, debtsForMem) {
     if (bill.tSplitType === 0) { //equal
       const divider = bill.tAccount.size;
