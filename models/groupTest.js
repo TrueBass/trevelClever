@@ -194,7 +194,8 @@ export async function getUserGroups(userId) {
     
   try {
     const combinedList = [...groups.docs, ...groups2.docs];
-    const returnGroupIds = combinedList.map(group => group.id);
+    const uniqueIdsSet = new Set(combinedList.map(group => group.id));
+    const returnGroupIds = Array.from(uniqueIdsSet);
     return returnGroupIds;
   }catch (error) {
     console.error('Errore');

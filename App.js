@@ -8,9 +8,8 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import FlashMessage from 'react-native-flash-message';
-
- import Groups from './models/groupsSchema/';
- import {getGroupSnapshot} from './models/groupTest/';
+ import {Transactions1, updateTransaction2} from './models/transactionsSchema/';
+import {getLocalTime, addBill} from './models/transactionTest/';
 // custom components imports:
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
@@ -48,20 +47,19 @@ export default function App() {
    const userId = "BaJ6rgAelpfummrGipoNXQktip22";
    const groupId = "Vkmi1FGzOSCpKBMB5969";
    const membersIds = ["-Nt_-3QPI1v-utxL1Tuh", "bqaGaKAbumXDIVZyVayLJTbxPdY2"];
-  //  async function someFunction(groupId) { // Ensure groupId is passed as an argument
-  //   try {
-  //     const list = await getGroupSnapshot(groupId);
-  //     if (list instanceof Groups) {
-  //       console.log("list ret:", list);
-  //     } else {
-  //       console.log("no   -> ", list);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error getting user groups:', error);
-  //   }
-  //}
+   let payees = [...membersIds, userId];
+   const time = getLocalTime();
+   let testbill = new Transactions1(time, groupId, userId, payees, 100, "DDK", 1);
+   updateTransaction2(testbill, [25, null, 50]);
+   async function someFunction(bill) { // Ensure groupId is passed as an argument
+    try {
+     await addBill(bill);
+    } catch (error) {
+      console.error('Error in try of someFunction:', error);
+    }
+  }
 
-  //someFunction();
+ someFunction(testbill);
 
 
 

@@ -1,7 +1,13 @@
 import { fs } from '../backend/config';
 import { showMessage } from "react-native-flash-message";
-import { collection, addDoc, updateDoc, getDoc, getDocs, deleteDoc, arrayUnion, where, doc, getFirestore, query} from 'firebase/firestore';
+import { collection, addDoc, updateDoc, getDoc, getDocs, deleteDoc, arrayUnion, where, doc, getFirestore, query, Timestamp} from 'firebase/firestore';
 import Transactions from './transactionsSchema/';
+
+export function getLocalTime(){
+  const localDate = new Date(); // Gets the local current time
+  const localTimestamp = Timestamp.fromDate(localDate);
+  return localTimestamp;
+}
 /**
  * Creates a group for a specific user in the Firestore. ➥ Returns groupId
  * 
@@ -11,17 +17,18 @@ import Transactions from './transactionsSchema/';
  *
  * @return {Promise<void>} groupId if successful
  */
-export const addBill = async (userId) => {
+export const addBill = async (newBill) => {
     try {
       // Reference to Firestore collection
       const billRef = collection(fs, `transactions`);
-      // Create a new group instance
-      let newBill = new Transactions(false, [userId], null, null, null, null, null);
-      // Add a new document with an auto-generated ID
-      const docRef = await addDoc(groupsRef, Object.assign({}, newGroup));
-      console.log("Group created successfully with ID:", docRef.id);
+      if (newBill.tAccount instanceof Map) {
+        newBill.tAccount = Object.fromEntries(newBill.tAccount);
+      }
+      const docRef = await addDoc(billRef, Object.assign({}, newBill));
+      console.log("Trans created with ID:", docRef.id);
       return docRef.id;
     } catch (error) {
       console.error("Error performing database operation:", error.message);
     }
   };
+
