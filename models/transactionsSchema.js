@@ -25,7 +25,8 @@
  * Creates a new instance representing a group transaction.
  * 
  * NOTE: it includes a Map to keep track of each member's share of the payment (initially set to null).
- * 
+ *        👩🏻‍✈️ guys, when you retrieve it from the firestore, you get a javascript object. 
+ *  👩🏻‍✈️ also I convert a map to a simple javasctipt object before updating the collection
  * @param {number} timestamp - use function getLocalTime() from ./models/transactionTest/
  * @param {string} groupId - The ID of the group associated with the transaction.
  * @param {string} whoPayed - The ID of the member who paid.
@@ -33,8 +34,9 @@
  * @param {number} amount - The total amount paid.
  * @param {string} currencyF - The currency of the amount.
  * @param {number} sType - The split type (0 for equal, 1 for custom).
+ * @param {string} title 
  */
-export function Transactions1 (timestamp, groupId, whoPayed, billMembers, amount, currencyF, sType) {
+export function Transactions1 (timestamp, groupId, whoPayed, billMembers, amount, currencyF, sType, title) {
     this.date = timestamp; // local timestamp
     this.groupId = groupId;
     this.tPayer = whoPayed;
@@ -44,6 +46,7 @@ export function Transactions1 (timestamp, groupId, whoPayed, billMembers, amount
     }
     this.tPayment = [amount, currencyF]; // Name of the group
     this.tSplitType = sType; 
+    this.title = title;
   }
 /**
  * Updates the transaction splitting logic based on split type.

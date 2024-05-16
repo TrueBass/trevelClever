@@ -1,0 +1,1 @@
+grouptest-> updated function getUserGroups(), it returns uniq vals now (using Set)

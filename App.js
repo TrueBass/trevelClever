@@ -9,7 +9,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import FlashMessage from 'react-native-flash-message';
  import {Transactions1, updateTransaction2} from './models/transactionsSchema/';
-import {getLocalTime, addBill} from './models/transactionTest/';
+import {getLocalTime, splitTotalBetweenMembers} from './models/transactionTest/';
 // custom components imports:
 // for code minimalization
 import SignUpForm from './screens/SingUpForm';
@@ -43,23 +43,20 @@ export default function App() {
     // there is only one screen we need to set.
     setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
-  
-   const userId = "BaJ6rgAelpfummrGipoNXQktip22";
+  const billId = "hYAJaaUgjI5oZQutfT6n";
+   const userId = "kec78HNqQeNNjTKJzQcLvwdHvFk2";
    const groupId = "Vkmi1FGzOSCpKBMB5969";
    const membersIds = ["-Nt_-3QPI1v-utxL1Tuh", "bqaGaKAbumXDIVZyVayLJTbxPdY2"];
-   let payees = [...membersIds, userId];
-   const time = getLocalTime();
-   let testbill = new Transactions1(time, groupId, userId, payees, 100, "DDK", 1);
-   updateTransaction2(testbill, [25, null, 50]);
-   async function someFunction(bill) { // Ensure groupId is passed as an argument
+  
+   async function someFunction(billId) { // Ensure groupId is passed as an argument
     try {
-     await addBill(bill);
+     await splitTotalBetweenMembers(billId);
     } catch (error) {
       console.error('Error in try of someFunction:', error);
     }
   }
 
- someFunction(testbill);
+ someFunction(billId);
 
 
 
