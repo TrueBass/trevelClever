@@ -43,20 +43,20 @@ export default function App() {
     // there is only one screen we need to set.
     setScreen(<WelcomeScreen onUserOption={showScreenHandler}/>);
   }
-  const billId = "hYAJaaUgjI5oZQutfT6n";
-   const userId = "kec78HNqQeNNjTKJzQcLvwdHvFk2";
-   const groupId = "Vkmi1FGzOSCpKBMB5969";
-   const membersIds = ["-Nt_-3QPI1v-utxL1Tuh", "bqaGaKAbumXDIVZyVayLJTbxPdY2"];
+//   const billId = "hYAJaaUgjI5oZQutfT6n";
+//    const userId = "kec78HNqQeNNjTKJzQcLvwdHvFk2";
+//    const groupId = "Vkmi1FGzOSCpKBMB5969";
+//    const membersIds = ["-Nt_-3QPI1v-utxL1Tuh", "bqaGaKAbumXDIVZyVayLJTbxPdY2"];
   
-   async function someFunction(billId) { // Ensure groupId is passed as an argument
-    try {
-     await splitTotalBetweenMembers(billId);
-    } catch (error) {
-      console.error('Error in try of someFunction:', error);
-    }
-  }
+//    async function someFunction(billId) { // Ensure groupId is passed as an argument
+//     try {
+//      await splitTotalBetweenMembers(billId);
+//     } catch (error) {
+//       console.error('Error in try of someFunction:', error);
+//     }
+//   }
 
- someFunction(billId);
+//  someFunction(billId);
 
 
 

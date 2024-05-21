@@ -34,7 +34,7 @@ function SideMenuScreen() {
             }
 
             screenOptions={globalNavBarStyle}>
-                <Drawer.Screen
+                {/* <Drawer.Screen
                     name="Camera"
                     options={
                         {
@@ -46,7 +46,7 @@ function SideMenuScreen() {
                         }
                     }
                     component={CameraScreen}
-                />
+                /> */}
                 <Drawer.Screen
                     name="Friends"
                     options={
