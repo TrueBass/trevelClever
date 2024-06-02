@@ -14,12 +14,13 @@ export default GroupItem;
 
 const styles = StyleSheet.create({
     groupItem: {
-        padding: 10,
-        marginVertical: 8,
-        backgroundColor: '#f9c2ff',
-        borderRadius: 10,
+        padding: 8,
+        margin: 8,
+        backgroundColor: '#bc86d7ff',
+        borderRadius: 50,
+        overflow: 'hidden',
     },
     groupName: {
-        fontSize: 16,
+        fontSize: 22,
     }
 });

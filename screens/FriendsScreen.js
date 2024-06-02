@@ -12,7 +12,6 @@ import {
     getNick,
     addFriendId,
 } from '../models/test';
-import { get, ref } from "firebase/database";
 
 export default function FriendsScreen(){
     const [friendNickname, setFriendNickname] = useState('');

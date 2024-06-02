@@ -267,6 +267,7 @@ export async function getGroupSnapshot(groupId) {
       const groupData = snapshot.data();
       return new Groups(
         groupData.active,
+        groupData.master,
         groupData.members,
         groupData.name,
         groupData.totalSpent,

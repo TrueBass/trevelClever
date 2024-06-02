@@ -1,14 +1,19 @@
-import { Camera, CameraType } from 'expo-camera';
-import { useState, useEffect } from 'react';
+// import { Camera, useCameraPermissions } from 'expo-camera';
+// import { CameraType } from 'expo-camera/build/legacy/Camera.types';
+// import { useState, useEffect } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+// problem with camera lib (CameraType, useCameraPermission),
+// so i commented all camera screen
+// in navigation bar
 
 export default function CameraScreen({ navigation }) {
 
   const [shouldAsk,setshouldAsk] = useState(true);
-  const [hasPermission, requestPermission] = Camera.useCameraPermissions();
-  const [isCameraActive, setIsCameraActive] = useState(false); 
+  const [hasPermission, requestPermission] = useCameraPermissions();//Camera.requestCameraPermissionsAsync();
+  const [isCameraActive, setIsCameraActive] = useState(false);
   const [type, setType] = useState(CameraType.back);
-
+  
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       setIsCameraActive(true);

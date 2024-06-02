@@ -9,30 +9,22 @@ import GroupItemScreen from "./GroupItemScreen";
 
 function GroupsScreen() {
     const [currentScreen, setCurrentScreen] = useState('Groups');
-    const [currentGroupId, setCurrentGroupId] = useState(null);
+    const [currentGroupObj, setCurrentGroupObj] = useState(null);
     const [currentUserUid, setCurrentUserUid] = useState(auth.currentUser.uid);
     const [ModalIsVisible, setModalIsVisible] = useState(false);
-    const [GroupsList, setGroupsList] = useState([]);
     const [isGroupListChanged, setIsGroupListChanged] = useState(true);
     const [userGroupListData, setUserGroupListData] = useState([]);
-    
-    useEffect(() => {
-        if (isGroupListChanged) {
-            refreshGroupList();
-        }
-    }, [isGroupListChanged]);
-    
+
     function startAddGroupHandler() {
         setModalIsVisible(true);
     }
 
     function endAddGroupHandler() {
         setModalIsVisible(false);
-        setIsGroupListChanged(true);
+        refreshGroupList();
     }
 
     async function AddGroupHandler(groupName) {
-        const UserGroupsId = await getUserGroups(currentUserUid);
         const newGroupId = await addGroup(currentUserUid);
         await editGroupName(newGroupId, groupName);
         endAddGroupHandler();
@@ -40,46 +32,56 @@ function GroupsScreen() {
 
     async function refreshGroupList() {
         const userGroupsId = await getUserGroups(currentUserUid);
-        
-        if (isGroupListChanged) {
-            const tempGroupList = [];
-            for (const id of userGroupsId) {
-                const group = await getGroupSnapshot(id);
-                const nameGroup = group.name;
-                tempGroupList.push({ id, nameGroup });
-            }
-            setUserGroupListData(tempGroupList);
-            setIsGroupListChanged(false);
+
+        const tempGroupList = [];
+        for (const id of userGroupsId) {
+            const group = await getGroupSnapshot(id);
+            // const nameGroup = group.name;
+            // tempGroupList.push({ id, nameGroup });
+            tempGroupList.push({id, group});
         }
+        setUserGroupListData(tempGroupList);
     }
 
-    function handleGroupItemPress(id) {
-        setCurrentGroupId(id);
+    function handleGroupItemPress(id, group) {
+        group.id = id;
+        setCurrentGroupObj(group);
         setCurrentScreen('EditGroup');
     }
-    
+
     if (currentScreen === 'EditGroup') {
-        return <GroupItemScreen groupId={currentGroupId} onBack={() => setCurrentScreen('Groups')} />;
+        return <GroupItemScreen
+                groupObj={currentGroupObj}
+                onBack={() =>{ 
+                    setIsGroupListChanged(true);
+                    setCurrentScreen('Groups');
+                }} 
+            />;
+    }
+
+    if (isGroupListChanged) {
+        refreshGroupList();
+        setIsGroupListChanged(false);
     }
     
     return (
         <View style={styles.container}>
             <View style={styles.groupListContainer}>
-                <FlatList 
+                <FlatList
                     data={userGroupListData} 
                     keyExtractor={itemData => itemData.id} 
-                    renderItem={({ item }) => (
+                    renderItem={({ item }) =>
                         <GroupItem 
-                            id={item.id} 
-                            nameGroup={item.nameGroup} 
-                            onPress={() => handleGroupItemPress(item.id)}
+                            id={item.id}
+                            nameGroup={item.group.name}
+                            onPress={() => handleGroupItemPress(item.id, item.group)}
                         />
-                    )}
+                    }
                 />
             </View>
             <View style={styles.buttonContainer}>
                 <AddRoundButton onPress={startAddGroupHandler} /> 
-                <GroupInput visible={ModalIsVisible} onAddGroup={AddGroupHandler} onCancel={endAddGroupHandler} />
+                <GroupInput visible={ModalIsVisible} onAddGroup={AddGroupHandler} onCancel={() => setModalIsVisible(false)} />
             </View>
         </View>
     );
@@ -93,9 +95,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     groupListContainer: {
-        flex: 5,
+        // flex: 5,
         borderWidth: 1,
-        borderColor: 'red'
+        borderColor: 'red',
+        flex: 5,
+        justifyContent: 'center',
+        alignItems: 'stretch',
+        // marginVertical: 10,
     },
     buttonContainer: {
         flex: 1,

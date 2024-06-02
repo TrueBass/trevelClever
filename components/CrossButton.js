@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import { MaterialIcons } from '@expo/vector-icons';
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { removeFriend } from '../models/test'
 
 export default function CrossButton({onRemove=null, currentUserId, friendId}){
@@ -11,7 +11,7 @@ export default function CrossButton({onRemove=null, currentUserId, friendId}){
 
     return (<View>
         <Pressable onPress={removeFriendHandler}>
-            <MaterialIcons name="highlight-remove"
+            <Icon name="trash-can-outline"
                 size={35} color="#df2e2eff"
             />
         </Pressable>

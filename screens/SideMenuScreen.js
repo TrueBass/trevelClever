@@ -95,7 +95,7 @@ function SideMenuScreen() {
                             drawerLabel: "Settings",
                             title: "Settings",
                             drawerIcon: () => (
-                                <MaterialIcons name="settings-suggest" size={24} color="black"/>
+                                <FontAwesome6 name="gears" size={24} color="black"/>
                             )
                         }
                     }
