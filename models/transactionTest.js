@@ -2,26 +2,48 @@ import { fs } from '../backend/config';
 import { showMessage } from "react-native-flash-message";
 import { collection, addDoc, updateDoc, getDoc, getDocs, deleteDoc, arrayUnion, where, doc, getFirestore, deleteField, Timestamp} from 'firebase/firestore';
 import Transactions from './transactionsSchema/';
-
+/**
+ * Gets the local current timestamp in Firestore's `Timestamp` format.
+ * 
+ * This function retrieves the current local date and time and converts it into a Firestore `Timestamp` object.
+ * 
+ * @returns {firebase.firestore.Timestamp} The current local timestamp.
+ */
 export function getLocalTime(){
   const localDate = new Date(); // Gets the local current time
   const localTimestamp = Timestamp.fromDate(localDate);
   return localTimestamp;
 }
+/**
+ * Asynchronously retrieves the snapshot of a transaction.
+ * 
+ * @param {firebase.firestore.Firestore} fs - The Firestore instance.
+ * @param {string} transactionId - The ID of the transaction document to be retrieved.
+ * @returns {Promise<Object>} A promise that resolves to the transaction document data if successful.
+ * @throws {Error} Throws an error if the transaction document does not exist.
+ */
 export async function getTransactionSnapshot(transactionId) {
-  const transactionRef = doc(fs, transactions/${transactionId});
+  const transactionRef = doc(fs, `transactions/${transactionId}`);
   const transactionSnapshot = await getDoc(transactionRef);
 
   if (transactionSnapshot.exists()) {
       return transactionSnapshot.data();
   } else {
-      throw new Error(Transaction with ID ${transactionId} does not exist.);
+      throw new Error("Transaction with ID ${transactionId} does not exist.");
   }
 }
+/**
+ * Asynchronously updates the reference to a bill in a group's document.
+ * @param {firebase.firestore.Firestore} fs - The Firestore instance.
+ * @param {string} groupId - The ID of the group document to be updated.
+ * @param {string} billId - The ID of the bill to be referenced.
+ * @returns {Promise<void>} A promise that resolves when the update is complete.
+ * @throws {Error} Logs an error message if the update operation fails.
+ */
 export const updateReference = async (groupId, billId) => {
 try {
-  const groupRef = doc(fs, groups/${groupId});
-await updateDoc(groupRef, { [transactions.${billId}]: true });
+  const groupRef = doc(fs, `groups/${groupId}`);
+await updateDoc(groupRef, { [`transactions.${billId}`]: true });
 } catch (error) {
   console.error("Error updating a group:", error.message);
 }  
@@ -64,7 +86,7 @@ export const addBill = async (newBill, groupId) => {
 export const deleteBill = async (transactionId, groupId) => {
   try {
     // Reference to Firestore collection
-    const billRef = doc(fs, transactions/${transactionId});
+    const billRef = doc(fs, `transactions/${transactionId}`);
     await deleteDoc(billRef);
     console.log("Transaction deleted with ID:", transactionId);
   }catch (error) {
@@ -72,8 +94,8 @@ export const deleteBill = async (transactionId, groupId) => {
   }
     // Update the group document (if groupId is provided)
     if (groupId) {
-      const groupRef = doc(fs, groups/${groupId});
-      await updateDoc(groupRef, { [transactions.${transactionId}]: deleteField() });
+      const groupRef = doc(fs, `groups/${groupId}`);
+      await updateDoc(groupRef, { [`transactions.${transactionId}`]: deleteField() });
       } else {
         console.warn("No reference to transaction found in group.");
       }
@@ -141,7 +163,7 @@ export async function changeSplitType(transactionId, newSplitType) {
  * @returns {Promise<void>}
  */
 export async function splitTotalBetweenMembers(transactionId) {
-  const transactionRef = doc(fs, transactions/${transactionId});
+  const transactionRef = doc(fs, `transactions/${transactionId}`);
   const transaction = await getDoc(transactionRef); // Retrieves the current transaction data
 
   if (transaction.exists()) {
@@ -160,7 +182,7 @@ export async function splitTotalBetweenMembers(transactionId) {
       // Update all members' debts to be equal.
       const updates = {};
       for (let memberId in bill.tAccount) {
-        updates[tAccount.${memberId}] = debt; // Potential issue if memberId doesn't exist
+        updates[`tAccount.${memberId}`] = debt; // Potential issue if memberId doesn't exist
       }
       await updateDoc(transactionRef, { tAccount: updates });
     } else if (bill.tSplitType === 1) {
@@ -170,7 +192,6 @@ export async function splitTotalBetweenMembers(transactionId) {
       for (let key in bill.tAccount) {
         // Potential issue if a key doesn't exist or has an unexpected type (not a number)
         if (bill.tAccount !== null && bill.tAccount[key] < 0) {
-          console.log("absolute value for: ", bill.tAccount[key]);
           difference += bill.tAccount[key]; //absolute value
         } else {
           nullCount++;
@@ -178,7 +199,7 @@ export async function splitTotalBetweenMembers(transactionId) {
       }
 
       console.log("total bill is ", bill.tPayment[0]);
-      console.log(Difference = ${difference}, new memebers to account=${nullCount});
+      console.log(`Difference = ${difference}, new memebers to account=${nullCount}`);
 
       if (nullCount !== 0) {
         updatedTAccount = {}
