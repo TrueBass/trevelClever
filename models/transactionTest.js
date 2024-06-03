@@ -8,6 +8,24 @@ export function getLocalTime(){
   const localTimestamp = Timestamp.fromDate(localDate);
   return localTimestamp;
 }
+export async function getTransactionSnapshot(transactionId) {
+  const transactionRef = doc(fs, transactions/${transactionId});
+  const transactionSnapshot = await getDoc(transactionRef);
+
+  if (transactionSnapshot.exists()) {
+      return transactionSnapshot.data();
+  } else {
+      throw new Error(Transaction with ID ${transactionId} does not exist.);
+  }
+}
+export const updateReference = async (groupId, billId) => {
+try {
+  const groupRef = doc(fs, groups/${groupId});
+await updateDoc(groupRef, { [transactions.${billId}]: true });
+} catch (error) {
+  console.error("Error updating a group:", error.message);
+}  
+}
 /**
  * Adds a new bill to the transactions collection.
  * 
@@ -20,35 +38,45 @@ export function getLocalTime(){
  * @returns {Promise<string|undefined>} A promise that resolves to the new document ID if successful,
  *   or `undefined` if the operation fails.
  */
-export const addBill = async (newBill) => {
-    try {
-      // Reference to Firestore collection
-      const billRef = collection(fs, `transactions`);
-      if (newBill.tAccount instanceof Map) {
-        newBill.tAccount = Object.fromEntries(newBill.tAccount);
-      }
-      const docRef = await addDoc(billRef, Object.assign({}, newBill));
-      console.log("Trans created with ID:", docRef.id);
-      return docRef.id;
-    } catch (error) {
-      console.error("Error performing database operation:", error.message);
+export const addBill = async (newBill, groupId) => {
+  try {
+    const billRef = collection(fs, transactions);
+    if (newBill.tAccount instanceof Map) {
+      newBill.tAccount = Object.fromEntries(newBill.tAccount);
     }
-  };
+    const docRef = await addDoc(billRef, Object.assign({}, newBill)); // Await here
+    console.log("Trans created with ID:", docRef.id);
+
+    updateReference(groupId, docRef.id);
+    return docRef.id;
+  
+}catch (error) {
+    console.error("Error performing database operation:", error.message);
+  }
+ 
+};
 /**
  * Asynchronously deletes 🗑️ a bill from the Firestore collection by its document ID.* 
  * @param {string} transactionId - The ID of the document representing the bill to be deleted.
  * @returns {Promise<void>} A promise that resolves when the delete operation is complete,
  *   or rejects with an error if the operation fails.
  */
-export const deleteBill = async (transactionId) => {
+export const deleteBill = async (transactionId, groupId) => {
   try {
     // Reference to Firestore collection
-    const billRef = doc(fs, `transactions/${transactionId}`);
+    const billRef = doc(fs, transactions/${transactionId});
     await deleteDoc(billRef);
     console.log("Transaction deleted with ID:", transactionId);
-  } catch (error) {
+  }catch (error) {
     console.error("Error performing database operation:", error.message);
   }
+    // Update the group document (if groupId is provided)
+    if (groupId) {
+      const groupRef = doc(fs, groups/${groupId});
+      await updateDoc(groupRef, { [transactions.${transactionId}]: deleteField() });
+      } else {
+        console.warn("No reference to transaction found in group.");
+      }
 };
 
 
@@ -113,46 +141,111 @@ export async function changeSplitType(transactionId, newSplitType) {
  * @returns {Promise<void>}
  */
 export async function splitTotalBetweenMembers(transactionId) {
-  const transactionRef = doc(fs, `transactions/${transactionId}`);
+  const transactionRef = doc(fs, transactions/${transactionId});
   const transaction = await getDoc(transactionRef); // Retrieves the current transaction data
 
   if (transaction.exists()) {
     const bill = transaction.data();
     console.log(bill);
+
+    const divider = Object.keys(bill.tAccount).length; // Potential issue if tAccount is empty
+
+    if (divider === 0) { // Handle case where there are no members (division by zero)
+      // You might want to throw an error or handle this scenario differently
+      return;
+    }
     if (bill.tSplitType === 0) {
-      const divider = Object.keys(bill.tAccount).length;
       const debt = bill.tPayment[0] / divider;
+
       // Update all members' debts to be equal.
       const updates = {};
       for (let memberId in bill.tAccount) {
-        updates[`tAccount.${memberId}`] = debt;
+        updates[tAccount.${memberId}] = debt; // Potential issue if memberId doesn't exist
       }
-      await updateDoc(transactionRef, updates);
+      await updateDoc(transactionRef, { tAccount: updates });
     } else if (bill.tSplitType === 1) {
-      let difference = bill.tPayment[0]; // To keep track of the sum of numbers
+      let difference = bill.tPayment[0]; // To keep track of remainder
       let nullCount = 0; // To count how many keys have null values
+
       for (let key in bill.tAccount) {
-        if (bill.tAccount[key] !== null) {
-          difference-=bill.tAccount[key] ;
+        // Potential issue if a key doesn't exist or has an unexpected type (not a number)
+        if (bill.tAccount !== null && bill.tAccount[key] < 0) {
+          console.log("absolute value for: ", bill.tAccount[key]);
+          difference += bill.tAccount[key]; //absolute value
         } else {
           nullCount++;
         }
       }
-      console.log(`Difference = ${difference}, nullCount=${nullCount}`);
-      if(nullCount !== 0){
-        difference = difference/nullCount;
-        for(let [key, value] of Object.entries(bill.tAccount)){
-          if(value===null){
-            bill.tAccount[key] = difference;
+
+      console.log("total bill is ", bill.tPayment[0]);
+      console.log(Difference = ${difference}, new memebers to account=${nullCount});
+
+      if (nullCount !== 0) {
+        updatedTAccount = {}
+        difference = difference / nullCount;
+        for (let [key, value] of Object.entries(bill.tAccount)) {
+          if (value === null || value > 0) {
+          updatedTAccount[key] = difference;
+        } else {
+          updatedTAccount[key] = value; // Preserve existing values for non-null, positive values
+        }
+      }
+      await updateDoc(transactionRef, { tAccount: updatedTAccount });
+      }
+    }
+      
+    } else {
+      throw new Error('Transaction document does not exist.');
+    }
+}
+/**
+ * Asynchronously finds all transactions that have a certain groupId and userId.
+ * 
+ * @param {string} groupId - The groupId to search for.
+ * @param {string} userId - The userId to search for in fields tPayer and tAccount.
+ * @returns {Promise<Array<object>>} A promise that resolves to an array of transactions matching the criteria,
+ *   or rejects with an error if the operation fails.
+ */
+export const findTransactions = async (groupId, userId) => {
+  try {
+    const groupRef = doc(fs, `groups/${groupId}`);
+    const groupDoc = await getDoc(groupRef);
+    
+    if (groupDoc.exists()) {
+      const transactions = groupDoc.data().transactions;
+      const userTransactions = [];
+
+      for (const [transactionId, value] of Object.entries(transactions)) {
+        if (value) {
+          const transactionRef = doc(fs, `transactions/${transactionId}`);
+          const transactionDoc = await getDoc(transactionRef);
+          
+          if (transactionDoc.exists()) {
+            const transactionData = transactionDoc.data();
+
+            if (transactionData.tAccount && transactionData.tAccount[userId] !== undefined) {
+              userTransactions.push({ transactionId, ...transactionData });
+            }
           }
         }
       }
-      await updateDoc(transactionRef, bill.tAccount);
+
+      return userTransactions;
+    } else {
+      console.error("No such group document!");
+      return [];
     }
-  } else {
-    throw new Error('Transaction document does not exist.');
+  
+  } catch (error) {
+    console.error("Error performing database operation:", error.message);
+    return [];
   }
-}
+};
+
+
+
+
+
 
 
 

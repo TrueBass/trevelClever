@@ -59,37 +59,40 @@ export function Transactions1 (timestamp, groupId, whoPayed, billMembers, amount
  * @param {Object} bill - The bill object containing transaction details.
  * @param {Array<number|null>} debtsForMem - Array of debt amounts for each member, or null if no pre-set debt.
  */
-  export function updateTransaction2 (bill, debtsForMem) {
-    if (bill.tSplitType === 0) { //equal
-      const divider = bill.tAccount.size;
-      const debt = bill.tPayment[0] / divider;
-      for (let key of bill.tAccount.keys()) { // Corrected iteration over keys
-        bill.tAccount.set(key, debt);
-      }
-    }
-    else if (bill.tSplitType === 1){
-      let it = 0;
-      let sum = 0; // To keep track of the sum of numbers
-      let nullCount = 0; // To count how many keys have null values
-      for (let key of bill.tAccount.keys()){
-        if(debtsForMem[it] !== null){
-          bill.tAccount.set(key, debtsForMem[it]);
-          sum+=debtsForMem[it];
-        }
-        else{
-          nullCount++;
-        }
-        it+=1;
-      }
-      if(sum !== bill.tPayment[0]){
-        let difference = bill.tPayment[0] - sum;
-        difference = difference/nullCount;
-        for(let [key, value] of bill.tAccount){
-          if(value===null){
-            bill.tAccount.set(key, difference);
-          }
-        }
-      }
-
+export function updateTransaction2 (bill, debtsForMem) {
+  if (bill.tSplitType === 0) { //equal
+    const divider = bill.tAccount.size;
+    const debt = bill.tPayment[0] / divider;
+    for (let key of bill.tAccount.keys()) { // Corrected iteration over keys
+      bill.tAccount.set(key, debt);
     }
   }
+  else if (bill.tSplitType === 1){
+    let it = 0;
+    let sum = 0; // To keep track of the sum of numbers
+    let nullCount = 0; // To count how many keys have null values
+    for (let key of bill.tAccount.keys()){
+      if(debtsForMem[it] !== null){
+        bill.tAccount.set(key, -debtsForMem[it]);//set zero for defined values
+        sum+=debtsForMem[it];
+      }
+      else{
+        nullCount++;
+      }
+      it+=1;
+    }
+    if(sum !== bill.tPayment[0]){
+      let difference = bill.tPayment[0] - sum;
+      difference = difference/nullCount;
+      for(let [key, value] of bill.tAccount){
+        console.log(key);
+        if(value===null){
+          bill.tAccount.set(key, difference);
+          
+        }
+      }
+    }
+
+  }
+}
+
