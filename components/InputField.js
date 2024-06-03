@@ -1,6 +1,6 @@
 import {StyleSheet, View, Text, TextInput} from 'react-native';
 
-function InputField({emptyString=false, returnKeyType='default', onSearch=null, fieldName, value, onChangeText, placeholder, secureTextEntry}){
+function InputField({keyboardType=null, emptyString=false, returnKeyType='default', onSearch=null, fieldName, value, onChangeText, placeholder, secureTextEntry}){
     return (
         <View>
             {
@@ -19,6 +19,7 @@ function InputField({emptyString=false, returnKeyType='default', onSearch=null, 
                 secureTextEntry={secureTextEntry || false}
                 returnKeyType={returnKeyType}
                 onSubmitEditing={onSearch}
+                keyboardType={keyboardType}
             />
         </View>
     );

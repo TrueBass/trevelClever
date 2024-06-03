@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, FlatList, Alert, Modal} from 'react-native';
-import {Title, TransactItem, AddRoundButton, PopUpMenu} from '../components';
+import { View, Text, Button, StyleSheet, FlatList, Alert, Modal, SafeAreaView} from 'react-native';
+import {Title, TransactItem, AddRoundButton, PopUpMenu, InputField} from '../components';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CheckBox from 'react-native-check-box';
 import GroupMembersScreen from '../screens/GroupMembersScreen';
+import { Transactions1 ,updateTransaction2 } from '../models/transactionsSchema';
+import { addBill,getLocalTime } from '../models/transactionTest';
 
 import { auth } from '../backend/config';
 
 import { showMessage } from 'react-native-flash-message';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { getNick } from '../models/test';
 
 function GroupItemScreen({ groupObj, onBack }) {
@@ -16,30 +17,37 @@ function GroupItemScreen({ groupObj, onBack }) {
     const [tranactListChanged, setTransactListChange] = useState(true);
     const [membersScreenVisible, setMembersScreenVisible] = useState(false);
     const [addTransactModalVisible, setTransactModalVisible] = useState(false);
+    const [addTransactFieldsVisible, setAddTransactFieldsVisible] = useState(false);
+    const [payerList, setPayerList] = useState([]);
     const [membersList, setMembersList] = useState([]);
+    const [checkedMembersList,setCheckedMembersList] = useState([]);
+    const [transactName,setTransactName] = useState("");
+    const [transactPayer,setTransactPayer] = useState("");
+    const [transactTotal,setTransactTotal] = useState("");
+    const [transactSplitType,setTransactSplitType] = useState(-1);
+    const [nameEmptyString,setNameEmptyString] = useState(false);
+    const [totalEmptyString,setTotalEmptyString] = useState(false);
     const isMaster = auth.currentUser.uid === groupObj.master;
 
     function refreshList(){
+        // console.log(groupObj.transactions, typeof groupObj.transactions);
         if(!groupObj.transactions)
             return;
         const tempList = [];
-        let index = 0;
-        for(const id of groupObj.transactions){
-            tempList.push({index, id});
-            index++;
+        for(const id of Object.keys(groupObj.transactions)){
+            // const title = await getTransactSnapshot();
+            tempList.push({id, index: id});
         }
 
         setTransactList(tempList);
-        setTransactListChange(true);
+        // setTransactListChange(true);
     }
 
     async function renderTrList(){
-        let id = 0;
         const tempList = [];
         for(const elem of groupObj.members){
             const nick = await getNick(elem);
-            tempList.push({id, nick, isChecked: false});
-            id++;
+            tempList.push({id :elem, nick: nick ?? 'unknown', isChecked: false});
         }
         setMembersList([...tempList]);
     }
@@ -60,9 +68,53 @@ function GroupItemScreen({ groupObj, onBack }) {
     }
 
     function cancelAddTransaction(){
+        setCheckedMembersList([]);
         setTransactModalVisible(false);
+        setAddTransactFieldsVisible(false);
     }
 
+    function onCheckNick(item)
+    {
+        console.log("Checked");
+        if(!checkedMembersList.includes(item.id)){
+            checkedMembersList.push(item.id);
+        }else if(item.isChecked && checkedMembersList.length){
+            const index = checkedMembersList.indexOf(item.id);
+            checkedMembersList.splice(index,1);
+        }
+        console.log("After check",checkedMembersList);
+    }
+
+    function doneCheckingMembers(){
+        if(checkedMembersList.length === 0){
+            showMessage({
+                message: "Hey!",
+                description: "You need to add members to the group",
+                icon: {icon: 'warning', position: 'left'},
+                type: 'warning',
+                duration: 3000
+            });
+            return;
+        }
+        setPayerList(()=>{
+            const tempList = [];
+            for(const i of membersList){
+                if(i.isChecked)
+                    tempList.push({id: i.id, nick: i.nick, isChecked: false});
+            }
+            return tempList;
+        });
+        console.log("checkedmembs: ", payerList);
+        setAddTransactFieldsVisible(true);
+    }
+
+    function createTransactionHandler(){
+        const localTime = getLocalTime();
+        const billObj = new Transactions1(localTime,groupObj.id,payerList,membersList,transactTotal,"PL",transactSplitType,transactName);
+        updateTransaction2(billObj,null);
+        (async()=>await addBill(billObj))();
+    }
+    
     if(tranactListChanged){
         refreshList();
         setTransactListChange(false);
@@ -86,7 +138,7 @@ function GroupItemScreen({ groupObj, onBack }) {
                     <Title>{groupObj.name}</Title>
                 </View>
                 <View style={styles.transactListView}>
-                    <FlatList
+                    <FlatList centerContent={true}
                         ListEmptyComponent={
                             <Text style={styles.emptyListText}>
                                 There are no debts yet...
@@ -96,7 +148,7 @@ function GroupItemScreen({ groupObj, onBack }) {
                         data={tranactList}
                         keyExtractor={item => item.index}
                         renderItem={({item}) => 
-                            <Text style={{fontSize: 32}}>{item.id}</Text>
+                            <Text style={{fontSize: 22}}>{item.id}</Text>
                         }
                     >
                     </FlatList>
@@ -105,41 +157,129 @@ function GroupItemScreen({ groupObj, onBack }) {
                 <View style={styles.bottomNavView}>
                     <AddRoundButton onPress={addTransactionHandler}/>
                 </View>
-            </View>
-            <Modal transparent visible={addTransactModalVisible}>
-                <SafeAreaView style={{flex: 1}}>
-                    <View style={{top: 455, height: 300, margin: 10, paddingHorizontal: 8,}}>
-                        <Icon name="chevron-left" size={24} onPress={cancelAddTransaction}/>
-                        <FlatList
-                            data={membersList}
-                            keyExtractor={item => item.id}
-                            renderItem={({item})=>{
-                                return(
-                                <View style={styles.checkBoxView}>
-                                    <CheckBox
-                                        leftText={item.nick}
-                                        leftTextStyle={{
-                                            fontSize: 22, textAlign: 'center',
-                                            color: item.isChecked?'green': 'black'
-                                        }}
-                                        isChecked={item.isChecked}
-                                        onClick={()=>{
-                                            onCheckNick(item);
-                                            setNicknamesList((currList)=> {
-                                                for(const i of currList){
-                                                    if(i.id === item.id)
-                                                        i.isChecked = !i.isChecked;
+                <Modal transparent={false} visible={addTransactModalVisible} presentationStyle='fullScreen'>
+                    <SafeAreaView>
+                    <View style={{ backgroundColor: 'white', marginTop: 30, marginHorizontal: 10, }}>
+                            { !addTransactFieldsVisible &&
+                            <>
+                                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <Icon name="chevron-left" size={24} onPress={cancelAddTransaction}/>
+                                    <Button title="Done" onPress={doneCheckingMembers}/>
+                                </View>
+                                <FlatList
+                                    data={membersList}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({item})=>{
+                                        return(
+                                    <View style={{marginHorizontal: 50}}>
+                                            <CheckBox
+                                                leftText={item.nick}
+                                                leftTextStyle={{
+                                                    fontSize: 22,
+                                                    margin: 10,
+                                                    color: item.isChecked?'green': 'black'
+                                                }}
+                                                isChecked={item.isChecked}
+                                                onClick={()=>{
+                                                    onCheckNick(item);
+                                                    setMembersList((currList)=> {
+                                                        for(const i of currList){
+                                                            if(i.id === item.id)
+                                                                i.isChecked = !i.isChecked;
+                                                        }
+                                                        return [...currList];
+                                                    });
+                                                }}
+                                            /> 
+                                        </View>);
+                                    }}
+                                />
+                            </>}
+                            { addTransactFieldsVisible &&
+                                <View style={{}}>
+                                    <Icon name="chevron-left" size={30} onPress={()=>setAddTransactFieldsVisible(false)}/>
+                                    <View style={{marginTop: 30, marginHorizontal: 10}}>
+                                        <InputField 
+                                            value={transactName}
+                                            fieldName="Bill name"
+                                            emptyString= {nameEmptyString}
+                                            onChangeText={(curr)=>{
+                                                setNameEmptyString(curr.trim().length === 0);
+                                                setTransactName(curr);
+                                            }}
+                                        />
+                                        <InputField
+                                            value={transactTotal}
+                                            fieldName="Total"
+                                            emptyString={totalEmptyString}
+                                            onChangeText={(curr)=>{
+                                                setTotalEmptyString(curr.trim().length === 0);
+                                                const comaIndex = curr.indexOf(",");
+                                                if(comaIndex !== -1 && curr.substring(comaIndex+1).length > 2){
+                                                    setTotalEmptyString(true);
+                                                    return;
                                                 }
-                                                return [...currList];
-                                            });
-                                        }}
-                                    /> 
-                                </View>);
-                            }}
-                        />
+                                                const normalized = curr.replace(",",".");
+                                                const num = Number(normalized);
+                                                console.log(num);
+                                                console.log(typeof num);
+                                                if(isNaN(num))
+                                                {
+                                                    setTotalEmptyString(true);
+                                                    return;
+                                                }
+                                                setTransactTotal(num);
+                                            }} 
+                                            keyboardType="decimal-pad"
+                                        />
+                                        <View style={{justifyContent: 'flex-start', marginVertical: 20}}>
+                                            <Text style={{marginRight: 40, fontSize: 22}}>Payer</Text>
+                                            <FlatList style={{borderWidth: 1, borderColor: '#212121', borderRadius: 8, marginTop: 5}}
+                                                data={payerList}
+                                                keyExtractor={item => item.id}
+                                                renderItem={({item})=>{
+                                                    return(
+                                                        <View style={{}}>
+                                                        <CheckBox
+                                                            leftText={item.nick}
+                                                            leftTextStyle={{
+                                                                fontSize: 22,
+                                                                margin: 10,
+                                                                color: item.isChecked?'green': 'black'
+                                                            }}
+                                                            isChecked={item.isChecked}
+                                                            onClick={()=>{
+                                                                setTransactPayer(item.id);
+                                                                setPayerList((currList)=> {
+                                                                    for(const i of currList){
+                                                                        if(i.isChecked)
+                                                                            i.isChecked = false;
+                                                                        if(i.id === item.id)
+                                                                            item.isChecked = true;
+                                                                    }
+                                                                    return [...currList];
+                                                                });
+                                                            }}
+                                                            /> 
+                                                    </View>);
+                                                }}
+                                            />
+                                        </View>
+                                        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                                            <Text style={{fontSize: 22}}>Split Type</Text>
+                                            <Button title='even' size={22} onPress={()=>setTransactSplitType(0)}/>
+                                            <Button title='custom' size={22} onPress={()=>setTransactSplitType(1)}/>
+                                        </View>
+                                    </View>
+                                    <View>
+                                        <Button title='Confirm' disabled={totalEmptyString || nameEmptyString || transactSplitType === -1 || transactPayer.length === 0} onPress={createTransactionHandler}/>
+                                    </View>
+                                </View>
+                            }
                     </View>
-                </SafeAreaView>
-            </Modal>
+                    </SafeAreaView>
+                </Modal>
+            </View>
         </View>
         : <GroupMembersScreen
             groupObj={groupObj}
