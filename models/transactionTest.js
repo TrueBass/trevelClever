@@ -62,7 +62,7 @@ await updateDoc(groupRef, { [`transactions.${billId}`]: true });
  */
 export const addBill = async (newBill, groupId) => {
   try {
-    const billRef = collection(fs, transactions);
+    const billRef = collection(fs, 'transactions');
     if (newBill.tAccount instanceof Map) {
       newBill.tAccount = Object.fromEntries(newBill.tAccount);
     }
@@ -177,8 +177,8 @@ export async function splitTotalBetweenMembers(transactionId) {
       return;
     }
     if (bill.tSplitType === 0) {
-      const debt = bill.tPayment[0] / divider;
-
+      let debt = bill.tPayment[0] / divider;
+      debt = Number(debt.toFixed(2));
       // Update all members' debts to be equal.
       const updates = {};
       for (let memberId in bill.tAccount) {
@@ -204,6 +204,7 @@ export async function splitTotalBetweenMembers(transactionId) {
       if (nullCount !== 0) {
         updatedTAccount = {}
         difference = difference / nullCount;
+        difference = Number(difference.toFixed(2));
         for (let [key, value] of Object.entries(bill.tAccount)) {
           if (value === null || value > 0) {
           updatedTAccount[key] = difference;

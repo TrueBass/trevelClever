@@ -62,7 +62,8 @@ export function Transactions1 (timestamp, groupId, whoPayed, billMembers, amount
 export function updateTransaction2 (bill, debtsForMem) {
   if (bill.tSplitType === 0) { //equal
     const divider = bill.tAccount.size;
-    const debt = bill.tPayment[0] / divider;
+    let debt = bill.tPayment[0] / divider;
+    debt = Number(debt.toFixed(2));
     for (let key of bill.tAccount.keys()) { // Corrected iteration over keys
       bill.tAccount.set(key, debt);
     }
@@ -84,6 +85,7 @@ export function updateTransaction2 (bill, debtsForMem) {
     if(sum !== bill.tPayment[0]){
       let difference = bill.tPayment[0] - sum;
       difference = difference/nullCount;
+      difference = Number(difference.toFixed(2));
       for(let [key, value] of bill.tAccount){
         console.log(key);
         if(value===null){
