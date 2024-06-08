@@ -5,7 +5,7 @@ function InputField({keyboardType=null, emptyString=false, returnKeyType='defaul
         <View>
             {
                 fieldName &&
-                <Text style={{color: emptyString?'red':'#462375'}}>
+                <Text style={{marginBottom: 5, color: emptyString?'red':'#462375'}}>
                     {fieldName}
                 </Text>
             }

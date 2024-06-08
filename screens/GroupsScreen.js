@@ -36,8 +36,6 @@ function GroupsScreen() {
         const tempGroupList = [];
         for (const id of userGroupsId) {
             const group = await getGroupSnapshot(id);
-            // const nameGroup = group.name;
-            // tempGroupList.push({ id, nameGroup });
             tempGroupList.push({id, group});
         }
         setUserGroupListData(tempGroupList);

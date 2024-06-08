@@ -55,15 +55,15 @@ function GroupInput(props){
                         </View>
                     }
                     {   friendsToAddCheckDone &&
-                        <View style={styles.inputFieldsContainer}>
-                            <InputField
-                                value={NameGroup}
-                                fieldName="Group name"
-                                placeholder="Your group name"
-                                onChangeText={(curr)=>GroupInputHandler(curr)}
-                                emptyString={emptyStrigCaution}
-                            />
-                        </View>
+                            <View style={styles.inputFieldsContainer}>
+                                <InputField
+                                    value={NameGroup}
+                                    fieldName="Group name"
+                                    placeholder="Your group name"
+                                    onChangeText={(curr)=>GroupInputHandler(curr)}
+                                    emptyString={emptyStrigCaution}
+                                />
+                            </View>
                     }
                     <View style={styles.buttonContainer}>
                         {   friendsToAddCheckDone&&

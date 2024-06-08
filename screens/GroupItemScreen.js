@@ -5,12 +5,13 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CheckBox from 'react-native-check-box';
 import GroupMembersScreen from '../screens/GroupMembersScreen';
 import { Transactions1 ,updateTransaction2 } from '../models/transactionsSchema';
-import { addBill,getLocalTime } from '../models/transactionTest';
+import { addBill, getTransactionSnapshot, getLocalTime, deleteBill } from '../models/transactionTest';
 
 import { auth } from '../backend/config';
 
 import { showMessage } from 'react-native-flash-message';
 import { getNick } from '../models/test';
+import EditTransactModal from '../components/EditTransactModal';
 
 function GroupItemScreen({ groupObj, onBack }) {
     const [tranactList, setTransactList] = useState(null);
@@ -18,6 +19,8 @@ function GroupItemScreen({ groupObj, onBack }) {
     const [membersScreenVisible, setMembersScreenVisible] = useState(false);
     const [addTransactModalVisible, setTransactModalVisible] = useState(false);
     const [addTransactFieldsVisible, setAddTransactFieldsVisible] = useState(false);
+    const [editTransactDialog, setEditTransactDialog] = useState(false);
+    const [editTransactId, setEditTransactId] = useState("");
     const [payerList, setPayerList] = useState([]);
     const [membersList, setMembersList] = useState([]);
     const [checkedMembersList,setCheckedMembersList] = useState([]);
@@ -29,18 +32,17 @@ function GroupItemScreen({ groupObj, onBack }) {
     const [totalEmptyString,setTotalEmptyString] = useState(false);
     const isMaster = auth.currentUser.uid === groupObj.master;
 
-    function refreshList(){
-        // console.log(groupObj.transactions, typeof groupObj.transactions);
+    async function refreshList(){
         if(!groupObj.transactions)
             return;
         const tempList = [];
         for(const id of Object.keys(groupObj.transactions)){
-            // const title = await getTransactSnapshot();
-            tempList.push({id, index: id});
+            const transactObj = await getTransactionSnapshot(id);
+            if(transactObj?.title){
+                tempList.push({id, title: transactObj.title});
+            }
         }
-
         setTransactList(tempList);
-        // setTransactListChange(true);
     }
 
     async function renderTrList(){
@@ -56,7 +58,7 @@ function GroupItemScreen({ groupObj, onBack }) {
         if(groupObj.members.length === 0){
             showMessage({
                 message: "",
-                description: "This group iss empty.\nYou can't make any debts.",
+                description: "This group is empty.\nYou can't make any bills.",
                 type: "warning",
                 duration: 3000,
                 icon: { position: "left", icon: "warning" },
@@ -104,15 +106,53 @@ function GroupItemScreen({ groupObj, onBack }) {
             }
             return tempList;
         });
-        console.log("checkedmembs: ", payerList);
         setAddTransactFieldsVisible(true);
     }
 
-    function createTransactionHandler(){
+    async function createTransactionHandler(){
         const localTime = getLocalTime();
-        const billObj = new Transactions1(localTime,groupObj.id,payerList,membersList,transactTotal,"PL",transactSplitType,transactName);
+        const billObj = new Transactions1(localTime,groupObj.id,transactPayer,checkedMembersList,transactTotal,"PL",transactSplitType,transactName);
         updateTransaction2(billObj,null);
-        (async()=>await addBill(billObj))();
+        
+        const res = await addBill(billObj,groupObj.id);
+            
+        if(res !== undefined){
+            setTransactListChange(true);
+            setTransactList([...tranactList,{id: res, title: transactName}]);
+            setAddTransactFieldsVisible(false);
+            setMembersScreenVisible(false);
+            setTransactModalVisible(false);
+            setTransactName("");
+            setTransactPayer("");
+            setTransactSplitType(-1);
+            setTransactTotal(0);
+            // setPayerList([]);
+        }
+    }
+
+    function delTransaction(transactId){
+        Alert.alert(
+            "Whiping out!",
+            "Are you sure you want to delete this bill?\nAll data will be deleted forever.",
+            [{
+                text: 'Yes', style: "default",
+                onPress:
+                async()=>{
+                    console.log(transactId);
+                    await deleteBill(transactId, groupObj.id);
+                    delete groupObj.transactions[transactId];
+                    setTransactListChange(true);
+                }
+             },
+             {
+                text: 'No', style: 'destructive'
+            }]
+        );
+    }
+
+    function editTransaction(transactId){
+        setEditTransactId(transactId);
+        setEditTransactDialog(true);
     }
     
     if(tranactListChanged){
@@ -141,18 +181,26 @@ function GroupItemScreen({ groupObj, onBack }) {
                     <FlatList centerContent={true}
                         ListEmptyComponent={
                             <Text style={styles.emptyListText}>
-                                There are no debts yet...
+                                There are no bills yet...
                             </Text>
                         }
                         
                         data={tranactList}
-                        keyExtractor={item => item.index}
-                        renderItem={({item}) => 
-                            <Text style={{fontSize: 22}}>{item.id}</Text>
-                        }
+                        keyExtractor={item => item.id}
+                        renderItem={({item}) => {
+                            return (
+                                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <Text style={{fontSize: 22}}>{item.title}</Text>
+                                    <View style={{flexDirection: 'row', marginLeft: 20}}>
+                                        <Icon name='playlist-edit' size={30} onPress={()=>editTransaction(item.id)}/>
+                                        <Icon name='delete-forever' size={30} onPress={(item)=>delTransaction(item.id)}/>
+                                    </View>
+                                </View>
+                            );
+                        }}
                     >
                     </FlatList>
-                    
+                    {editTransactDialog&&<EditTransactModal visible={editTransactDialog} transactId={editTransactId} setVisible={(val)=>setEditTransactDialog(val)}/>}
                 </View>
                 <View style={styles.bottomNavView}>
                     <AddRoundButton onPress={addTransactionHandler}/>
@@ -272,7 +320,9 @@ function GroupItemScreen({ groupObj, onBack }) {
                                         </View>
                                     </View>
                                     <View>
-                                        <Button title='Confirm' disabled={totalEmptyString || nameEmptyString || transactSplitType === -1 || transactPayer.length === 0} onPress={createTransactionHandler}/>
+                                        <Button title='Confirm' disabled={totalEmptyString || nameEmptyString || transactSplitType === -1 || transactPayer.length === 0}
+                                            onPress={async()=>await createTransactionHandler()}
+                                        />
                                     </View>
                                 </View>
                             }

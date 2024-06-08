@@ -24,6 +24,9 @@ function SignUpForm({ onCancel, onPressSignUp }) {
   const [userInputNickname, setUserInputNickname] = useState('');
   const [userInputEmail, setUserInputEmail] = useState('');
   const [userInputPasswd, setUserInputPasswd] = useState('');
+  const [emailEmptySrting,setEmailEmptyStr] = useState(false);
+  const [nicknameEmptySrting,setNicknameEmptyStr] = useState(false);
+  const [passwordEmptySrting,setPasswordEmptyStr] = useState(false);
 
   async function SignUpHandler() {
 
@@ -116,28 +119,32 @@ function SignUpForm({ onCancel, onPressSignUp }) {
       </View>
       <View style={styles.inputComponent}>
         <InputField
-          fieldName={'Nickname'}
-          placeholder={'nickname'}
-          onChangeText={(userNicknameValue) =>
-            setUserInputNickname(userNicknameValue)
-          }
           value={userInputNickname}
+          fieldName={'Nickname'}
+          emptyString={nicknameEmptySrting}
+          onChangeText={(userNicknameValue) => {
+            setUserInputNickname(userNicknameValue);
+            setNicknameEmptyStr(userNicknameValue.trim().length === 0);
+          }}
         />
         <InputField
           fieldName={'Email'}
-          placeholder={'email'}
           value={userInputEmail}
-          onChangeText={(userEmailValue) =>
-            setUserInputEmail(userEmailValue)
-          }
+          emptyString={emailEmptySrting}
+          onChangeText={(userEmailValue) => {
+            setUserInputEmail(userEmailValue);
+            setEmailEmptyStr(userEmailValue.trim().length === 0);
+          }}
+          
         />
         <InputField
           fieldName={'Password'}
-          placeholder={'password'}
           value={userInputPasswd}
-          onChangeText={(userPasswdValue) =>
-            setUserInputPasswd(userPasswdValue)
-          }
+          emptyString={passwordEmptySrting}
+          onChangeText={(userPasswdValue) => {
+            setUserInputPasswd(userPasswdValue);
+            setPasswordEmptyStr(userPasswdValue.trim().length === 0);
+          }}
           secureTextEntry={true}
         />
       </View>
