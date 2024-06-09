@@ -332,3 +332,103 @@ export async function deleteGroupMember(groupId, memberId) {
  }
   
 }
+
+
+// Function to create a net amount list
+export const createNetAmountList = async (groupId) => {
+  try {
+    // Reference to the group document
+    const groupRef = doc(fs, `groups/${groupId}`);
+    const groupDoc = await getDoc(groupRef);
+
+    if (!groupDoc.exists()) {
+        throw new Error('Group not found');
+    }
+    const groupSnap = groupDoc.data();
+    const  { transactions } = groupSnap.transactions
+
+    // Net amounts object to store the resulting balances
+    let netAmounts = {};
+
+    // Iterate over each transaction ID in the transactions map
+    for (const transactionId in transactions) {
+      if (transactions[transactionId]) {
+        const transactionRef = doc(fs, `transactions/${transactionId}`);
+        const transactionDoc = await getDoc(transactionRef);
+
+        if (transactionDoc.exists()) {
+          const { tAccount } = transactionDoc.data();
+          // Iterate over each userId in tAccount and update netAmounts
+          for (let userId in tAccount) {
+            let amount = abs(tAccount[userId]);
+            if (!netAmounts[userId]) {
+              netAmounts[userId] = 0;
+            }
+            netAmounts[userId] += amount;
+          }
+        }
+      }
+    }
+
+    return netAmounts;
+  } catch (error) {
+    console.error("Error retrieving transactions and calculating net amounts:", error);
+    return {};
+  }
+};
+
+// Minimal Transaction Algorithm
+export const minimizeTransactions = async (groupId) => {
+  try {
+    const netAmounts = await createNetAmountList(groupId);
+    const debtors = [];
+    const creditors = [];
+    const transactions = [];
+
+    // Separate debtors and creditors based on their net amounts
+    for (const userId in netAmounts) {
+      const amount = netAmounts[userId];
+      if (amount < 0) {
+        debtors.push({ userId, amount: -amount });
+      } else if (amount > 0) {
+        creditors.push({ userId, amount });
+      }
+    }
+
+    // Sort debtors and creditors by their amounts
+    debtors.sort((a, b) => b.amount - a.amount);
+    creditors.sort((a, b) => b.amount - a.amount);
+
+    // Minimize transactions
+    while (debtors.length > 0 && creditors.length > 0) {
+      const debtor = debtors.pop();
+      const creditor = creditors.pop();
+
+      const settledAmount = Math.min(debtor.amount, creditor.amount); //70 90
+
+      transactions.push({
+        from: debtor.userId,
+        to: creditor.userId,
+        amount: settledAmount
+      });
+
+      debtor.amount -= settledAmount;
+      creditor.amount -= settledAmount;
+
+      if (debtor.amount > 0) {
+        debtors.push(debtor);
+        debtors.sort((a, b) => b.amount - a.amount);
+      }
+
+      if (creditor.amount > 0) {
+        creditors.push(creditor);
+        creditors.sort((a, b) => b.amount - a.amount);
+      }
+    }
+
+    return transactions;
+  } catch (error) {
+    console.error("Error minimizing transactions:", error);
+    return [];
+  }
+};

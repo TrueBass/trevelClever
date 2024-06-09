@@ -137,8 +137,8 @@ export async function addMemberToAccount(transactionId, memberId) {
  */
 export async function deleteMemberFromAccount(transactionId, memberId) {
   const transactionRef = doc(fs, `transactions/${transactionId}`);
-  // Use FieldValue.delete() from 'firebase/firestore' for deleting fields from documents.
-  await updateDoc(transactionRef, { [`tAccount.${memberId}`]: deleteField() });
+  const delRef = `tAccount.${memberId}`;
+  await updateDoc(transactionRef, { [delRef]: deleteField() });
 }
 /**
  * Asynchronously changes the split type 
