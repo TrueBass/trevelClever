@@ -25,6 +25,19 @@ import {
  * \
  * if user hasn't been found, returns null
  */
+const getAvatarUrl = (username) => `https://avatars.dicebear.com/api/bottts/${username}.svg`;
+
+const saveAvatar = async (userId, username) => {
+  const avatarUrl = getAvatarUrl(username);
+  set(ref(db, 'users/' + userId + '/profilePhotoUrl'), avatarUrl)
+    .then(() => {
+      console.log('Avatar URL saved successfully');
+    })
+    .catch((error) => {
+      console.error('Error saving avatar URL:', error);
+    });
+};
+
 export async function getNick(userUid){
   try{
     const nickRef = ref(db, 'users/' + userUid + '/nickname');

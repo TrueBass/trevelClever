@@ -16,7 +16,7 @@ export const addGroup = async (userId) => {
     // Reference to Firestore collection
     const groupsRef = collection(fs, `groups`);
     // Create a new group instance
-    let newGroup = new Groups(false, [userId], null, null, null, null, null);
+    let newGroup = new Groups(false, userId, null, null, null, null, null);
     // Add a new document with an auto-generated ID
     const docRef = await addDoc(groupsRef, Object.assign({}, newGroup));
     console.log("Group created successfully with ID:", docRef.id);
@@ -184,7 +184,6 @@ export async function updateGroupMembers(groupId, memberIds) {
  * error message.
  */
 export async function getUserGroups(userId) {
-    const fs = getFirestore(); // Initialize Firestore instance
     const groupsCollectionRef = collection(fs, 'groups');
     const q = await query(groupsCollectionRef,
     where('master', '==', userId));

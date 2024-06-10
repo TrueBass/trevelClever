@@ -96,9 +96,15 @@ export const deleteBill = async (transactionId, groupId) => {
     if (groupId) {
       const groupRef = doc(fs, `groups/${groupId}`);
       await updateDoc(groupRef, { [`transactions.${transactionId}`]: deleteField() });
+      
+      const groupDoc = await getDoc(groupRef);
+      if (groupDoc.exists() && Object.keys(groupDoc.data().transactions).length === 0) {
+      await toggleActiveState(userId, groupDoc.data().master);
+    }
       } else {
         console.warn("No reference to transaction found in group.");
       }
+
 };
 
 
