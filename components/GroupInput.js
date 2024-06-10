@@ -21,6 +21,8 @@ function GroupInput(props){
 
     function GroupInputHandler(enteredText){
         setEmptyStringCaution(enteredText.trim().length === 0);
+        if(enteredText.length > 25 && enteredText.length < 1)
+            setEmptyStringCaution(true); 
         setNameGroup(enteredText);
     }
 
@@ -30,12 +32,17 @@ function GroupInput(props){
     }
 
     function pushCheckedFriend(idList){
+
         setCheckedNicksList([...idList]);
     }
 
     function doneChoosingFriends(val){
-        setVisible(!val);
-        setFriendsToAddCheckDone(val);
+        if(checkedNicksList.length > 0)
+            {
+                setVisible(!val);
+                setFriendsToAddCheckDone(val);
+            }
+        
     }
 
     return(
@@ -60,14 +67,16 @@ function GroupInput(props){
                                     value={NameGroup}
                                     fieldName="Group name"
                                     placeholder="Your group name"
-                                    onChangeText={(curr)=>GroupInputHandler(curr)}
+                                    onChangeText={(curr)=>
+                                        GroupInputHandler(curr)
+                                    }
                                     emptyString={emptyStrigCaution}
                                 />
                             </View>
                     }
                     <View style={styles.buttonContainer}>
                         {   friendsToAddCheckDone&&
-                            <Button title="Confirm" onPress={AddGroupHandler}/>}
+                            <Button disabled={emptyStrigCaution} title="Confirm" onPress={AddGroupHandler}/>}
                         {   friendsToAddCheckDone&&
                             <Button title="Cancel"
                                 onPress={()=>{

@@ -26,7 +26,7 @@ function GroupsScreen() {
 
     async function AddGroupHandler(groupName) {
         const newGroupId = await addGroup(currentUserUid);
-        await editGroupName(newGroupId, groupName);
+        await editGroupName(newGroupId, groupName.trim());
         endAddGroupHandler();
     }
 
@@ -38,7 +38,7 @@ function GroupsScreen() {
             const group = await getGroupSnapshot(id);
             tempGroupList.push({id, group});
         }
-        setUserGroupListData(tempGroupList);
+        setUserGroupListData([...tempGroupList]);
     }
 
     function handleGroupItemPress(id, group) {
@@ -58,7 +58,7 @@ function GroupsScreen() {
     }
 
     if (isGroupListChanged) {
-        refreshGroupList();
+        (async ()=>refreshGroupList())();
         setIsGroupListChanged(false);
     }
     

@@ -85,7 +85,7 @@ export default function FriendsChecklist({currMembers = null, type = null, onCan
                         {   setVisibleProp !== null ?
                             <View style={{flexDirection: 'row',justifyContent: 'space-between'}}>
                                 <Icon name="chevron-left" size={24} onPress={onBack}/>
-                                <Button title="Sumbit" onPress={onDoneAddingMembers}/>
+                                <Button title="Done" onPress={onDoneAddingMembers}/>
                             </View>:
                             <Icon name="account-multiple-check-outline"
                                 size={30} style={{left: 355}}

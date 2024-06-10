@@ -1,6 +1,6 @@
 import { fs } from '../backend/config';
 import { showMessage } from "react-native-flash-message";
-import { collection, addDoc, updateDoc, getDoc, getDocs, deleteDoc, arrayUnion, where, doc, getFirestore, query} from 'firebase/firestore';
+import { collection, addDoc, updateDoc, getDoc, getDocs, deleteDoc, arrayUnion, where, doc, getFirestore, query, limit} from 'firebase/firestore';
 import Groups from './groupsSchema/';
 /**
  * Creates a group for a specific user in the Firestore. ➥ Returns groupId
@@ -174,7 +174,7 @@ export async function updateGroupMembers(groupId, memberIds) {
  *
  * @param {string} userId - The unique ID of the user whose groups are being fetched.
  * This function performs asynchronous requests to query the Firestore database for groups where the user
- * is either the 'master' or listed within 'members' of the group.
+ * is either the 'master' or listefd within 'members' of the group.
  *
  * It fetches two sets of groups: one where the user is the master and another where the user is a member.
  * The results of these queries are combined, and the unique group IDs are extracted and returned.
@@ -183,23 +183,49 @@ export async function updateGroupMembers(groupId, memberIds) {
  * either a master or a member. If an error occurs during the operation, the promise rejects with an
  * error message.
  */
+
+
+
+
 export async function getUserGroups(userId) {
     const groupsCollectionRef = collection(fs, 'groups');
-    const q = await query(groupsCollectionRef,
-    where('master', '==', userId));
-    const groups = await getDocs(q);
-    const memberQuery = query(groupsCollectionRef, where('members', 'array-contains', userId));
-    const groups2 = await getDocs(memberQuery);
     
-  try {
-    const combinedList = [...groups.docs, ...groups2.docs];
-    const uniqueIdsSet = new Set(combinedList.map(group => group.id));
-    const returnGroupIds = Array.from(uniqueIdsSet);
-    return returnGroupIds;
-  }catch (error) {
-    console.error('Errore');
-  } 
+    const masterQuery = query(groupsCollectionRef, where('master', '==', userId));
+    const memberQuery = query(groupsCollectionRef, where('members', 'array-contains', userId));
+    
+    try {
+        // Виконуємо запити окремо та логуємо результати
+        const masterGroupsSnapshot = await getDocs(masterQuery);
+        console.log("Master Groups:");
+        masterGroupsSnapshot.forEach(doc => {
+            console.log(`id: ${doc.id}, Data: `, doc.data());
+        });
+
+        const memberGroupsSnapshot = await getDocs(memberQuery);
+        console.log("Member Groups:");
+        memberGroupsSnapshot.forEach(doc => {
+            console.log(`id: ${doc.id}, Data: `, doc.data());
+        });
+
+        // Об'єднуємо результати двох запитів
+        const combinedList = [...masterGroupsSnapshot.docs, ...memberGroupsSnapshot.docs];
+        const uniqueIdsSet = new Set(combinedList.map(group => group.id));
+        const returnGroupIds = Array.from(uniqueIdsSet);
+
+        console.log("Combined List:");
+        combinedList.forEach(doc => {
+            console.log(`id: ${doc.id}, Data: `, doc.data());
+        });
+
+        return returnGroupIds;
+    } catch (error) {
+        console.error('Error:', error);
+        return [];
+    }
 }
+
+
+
 
 
 /**

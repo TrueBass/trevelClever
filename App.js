@@ -8,8 +8,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import FlashMessage from 'react-native-flash-message';
-// custom components imports:
-// for code minimalization
 import SignUpForm from './screens/SingUpForm';
 import WelcomeScreen from './screens/WelcomeScreen';
 import LoginForm from './screens/LoginForm';
@@ -20,7 +18,7 @@ export default function App() {
   const [screen, setScreen] = useState(<WelcomeScreen onUserOption={showScreenHandler}/>);
   const logInScreen = <LoginForm onPressLogin={loginButtonHandler} onCancel={cancelSingUpHandler}/>;
   const signUpScreen = <SignUpForm onCancel={cancelSingUpHandler} onPressSignUp={signUpButtonHandler}/>;
- 
+  
   function loginButtonHandler(){
     setScreen(<SideMenuScreen />);
   }

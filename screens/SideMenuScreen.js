@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import React from 'react';
+import React,{useState} from 'react';
 import { View, StyleSheet, Settings,Image,Text } from "react-native";
 import {FontAwesome5,FontAwesome6,Ionicons,MaterialIcons} from "@expo/vector-icons";
 import { NavigationContainer } from '@react-navigation/native';
@@ -10,11 +10,31 @@ import GroupsScreen from "./GroupsScreen";
 import ReceiptScreen from "./ReceiptScreen";
 import SettingsScreen from "./SettingsScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
-import user from "../assets/user.png"
+import { auth } from '../backend/config';
+import { getNick } from "../models/test";
 const Drawer = createDrawerNavigator();
 
 
-function SideMenuScreen() {
+function SideMenuScreen({setScreen}) {
+    const [currentUserUid, setCurrentUserUid] = useState(auth.currentUser.uid);
+    const [nickName, setNickName] = useState("");
+    const [avatarUrll, setAvatarUrl] = useState("");
+
+    if (nickName === "" && avatarUrll === "") {
+        async function fetchData() {
+            const nick = await getNick(currentUserUid);
+            setNickName(nick);
+
+            const username = "Crazy Polish Bober";
+            const usrenamechange = username.replace(" ", '');         
+            const getAvatarUrl = (usrenamechange) => `https://api.dicebear.com/8.x/bottts/png?seed="${usrenamechange}"`;
+            const avatarUrl = getAvatarUrl(usrenamechange);
+            setAvatarUrl(avatarUrl);
+        }
+
+        fetchData();
+    }
+
     return (
          <NavigationContainer>
             <Drawer.Navigator 
@@ -24,8 +44,8 @@ function SideMenuScreen() {
                     return(
                         <SafeAreaView>
                             <View style={userAvatarBackGroundStyle}>
-                                <Image source={user} style={userAvatarStyle}/>
-                                <Text>Adam Mickiewicz</Text>
+                                <Image source={{ uri: avatarUrll  }} style={userAvatarStyle} />
+                                <Text>{nickName}</Text>
                             </View>
                             <DrawerItemList {...props}/>
                         </SafeAreaView>
@@ -100,6 +120,7 @@ function SideMenuScreen() {
                         }
                     }
                     component={SettingsScreen}
+                    initialParams={{setScreen}}
                 />
             </Drawer.Navigator>
         </NavigationContainer>

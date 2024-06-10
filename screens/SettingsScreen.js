@@ -1,9 +1,25 @@
-import {View,Text} from "react-native"
+import { View, Text, Button } from "react-native";
+import React from 'react';
+import { auth } from '../backend/config'; // імпортувати firebase або auth з вашого конфігураційного файлу
 
-function SettingsScreen(){
-    return(
+
+function SettingsScreen({ navigation }) {
+
+    // function logOut() {
+    //     auth.currentUser. .signOut()
+    //         .then(() => {
+    //             // Успішно вийшли з облікового запису
+    //             navigation.navigate('WelcomeScreen'); // Перенаправлення на WelcomeScreen
+    //         })
+    //         .catch((error) => {
+    //             // Виникла помилка при виході з облікового запису
+    //             console.error('Помилка виходу з облікового запису:', error);
+    //         });
+    // }
+
+    return (
         <View>
-            <Text>Testowyj ekran</Text>
+            <Button title="Log Out"/>
         </View>
     );
 }
