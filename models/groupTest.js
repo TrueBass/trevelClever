@@ -196,26 +196,26 @@ export async function getUserGroups(userId) {
     try {
         // Виконуємо запити окремо та логуємо результати
         const masterGroupsSnapshot = await getDocs(masterQuery);
-        console.log("Master Groups:");
-        masterGroupsSnapshot.forEach(doc => {
-            console.log(`id: ${doc.id}, Data: `, doc.data());
-        });
+        // console.log("Master Groups:");
+        // masterGroupsSnapshot.forEach(doc => {
+        //     console.log(`id: ${doc.id}, Data: `, doc.data());
+        // });
 
         const memberGroupsSnapshot = await getDocs(memberQuery);
-        console.log("Member Groups:");
-        memberGroupsSnapshot.forEach(doc => {
-            console.log(`id: ${doc.id}, Data: `, doc.data());
-        });
+        // console.log("Member Groups:");
+        // memberGroupsSnapshot.forEach(doc => {
+        //     console.log(`id: ${doc.id}, Data: `, doc.data());
+        // });
 
         // Об'єднуємо результати двох запитів
         const combinedList = [...masterGroupsSnapshot.docs, ...memberGroupsSnapshot.docs];
         const uniqueIdsSet = new Set(combinedList.map(group => group.id));
         const returnGroupIds = Array.from(uniqueIdsSet);
 
-        console.log("Combined List:");
-        combinedList.forEach(doc => {
-            console.log(`id: ${doc.id}, Data: `, doc.data());
-        });
+        // console.log("Combined List:");
+        // combinedList.forEach(doc => {
+        //     console.log(`id: ${doc.id}, Data: `, doc.data());
+        // });
 
         return returnGroupIds;
     } catch (error) {
@@ -244,7 +244,6 @@ export async function toggleActiveState(userId, groupId) {
     const groupSnapshot = await getDoc(groupDocRef);
     if (groupSnapshot.exists()) {
       const groupData = groupSnapshot.data();
-      console.log(groupData.master);
       const master = groupData.master;
       const activeState = groupData.active;
       if (activeState === false || userId === master) {
@@ -324,7 +323,6 @@ export async function deleteGroupMember(groupId, memberId) {
     const snapicData = snapic.data()
     masterId = snapicData.master
     membersList = snapicData.members
-
     if (masterId === memberId) {
       showMessage({
         message: "Error",
@@ -335,8 +333,8 @@ export async function deleteGroupMember(groupId, memberId) {
       });
     } else {
       try {
-        await updateDoc(memberDocRef, {
-          deleted: firestore.FieldValue.delete()
+        await updateDoc(groupDocRef, {
+          members: membersList.filter(item=>item!==memberId)
         });
         console.log(`Member ${memberId} deleted successfully from group: ${groupId}.`);
       } catch (error) {

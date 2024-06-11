@@ -6,7 +6,8 @@ import { PrimaryButton } from "../components";
 import FriendsChecklist from "../components/FriendsChecklist";
 
 import { findUserByUid } from "../models/test";
-import { updateGroupMembers } from "../models/groupTest";
+import { deleteGroupMember, updateGroupMembers } from "../models/groupTest";
+import { STYLES } from "../utils/colors";
 
 export default function GroupMembersScreen({ groupObj, onBack, isMaster }){
     const [membersList, setMembersList] = useState([]);
@@ -14,10 +15,13 @@ export default function GroupMembersScreen({ groupObj, onBack, isMaster }){
     const [checkedFriendsToAdd, setCheckedFriendsToAdd]= useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [masterNick, setMasterNick]= useState("");
+    const [currMembersList, setCurrMembersList] = useState(groupObj.members);
 
     async function refreshList(){
-        const tempList = [];
+        if(!groupObj.members)
+            return;
 
+        const tempList = [];
         for(const id of groupObj.members){
             const memberObj = await findUserByUid(id);
             memberObj?.nickname &&
@@ -25,6 +29,16 @@ export default function GroupMembersScreen({ groupObj, onBack, isMaster }){
         }
 
         setMembersList(tempList);
+    }
+    async function refreshListOnDone(checkedList){
+        const tempList = [];
+        for(const id of checkedList){
+            const memberObj = await findUserByUid(id);
+            memberObj?.nickname &&
+            tempList.push({id, nickName: memberObj.nickname});
+        }
+
+        setMembersList([...membersList,...tempList]);
     }
 
     function pushCheckedFriend(idList){
@@ -34,9 +48,16 @@ export default function GroupMembersScreen({ groupObj, onBack, isMaster }){
     function doneAddingFriends(checkedList){
         (async()=>{
             await updateGroupMembers(groupObj.id, checkedList);
+            await refreshListOnDone(checkedList);
         })();
-        setMembersList([...membersList, ...checkedList]);
         setMembersListChanged(true);
+    }
+
+    function delMemberHandler(groupId,memberId){
+        (async()=>await deleteGroupMember(groupId,memberId))();
+        setMembersList(membersList.filter(elem => elem.id !== memberId));
+        setCurrMembersList(currMembersList.filter(elem=>elem!== memberId));
+        // setMembersListChanged(true);
     }
 
     if(!isMaster){
@@ -47,13 +68,13 @@ export default function GroupMembersScreen({ groupObj, onBack, isMaster }){
     }
 
     if(membersListChanged){
-        refreshList();
+        (async()=>await refreshList())();
         setMembersListChanged(false);
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.topButtons}>
+        <View style={STYLES.container}>
+            <View style={STYLES.topButtons}>
                 <Icon name="chevron-left"
                     size={30}
                     onPress={onBack}
@@ -75,25 +96,25 @@ export default function GroupMembersScreen({ groupObj, onBack, isMaster }){
                 data={membersList}
                 keyExtractor={item => item.id}
                 renderItem={({item}) => 
-                    <View style={{margin: 10, alignItems: 'center', borderWidth: 1, borderRadius: 8}}>
-                        <Text style={
-                            [
-                                styles.memberNickname,
-                                {
-                                    color: item.id === groupObj.master?'red':'black'
-                                }
-                            ]}
-                        >
+                    <View style={{
+                        flexDirection: 'row', justifyContent: 'space-around',
+                        margin: 10, borderWidth: 1, borderRadius: 8}}>
+                        <Text style={styles.memberNickname}>
                             {item.nickName}
                         </Text>
+                        {isMaster &&
+                            <Icon name="delete-forever" size={32} color='red'
+                                onPress={()=>delMemberHandler(groupObj.id,item.id)}
+                            />
+                        }
                     </View>
                 }
-                style={styles.flatList}
+                style={STYLES.flatList}
             >
             </FlatList>
             {
                 isMaster?
-                <View style={styles.addButton}>
+                <View style={STYLES.addButton}>
                     <PrimaryButton onPress={()=>setModalVisible(true)}>
                         Add a member
                     </PrimaryButton>
@@ -102,7 +123,7 @@ export default function GroupMembersScreen({ groupObj, onBack, isMaster }){
                         setVisibleProp={setModalVisible}
                         checkedList={checkedFriendsToAdd}
                         onDone={doneAddingFriends}
-                        currMembers={groupObj.members}
+                        currMembers={currMembersList}
                     />
                 </View>:
                 <></>

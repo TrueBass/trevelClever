@@ -13,6 +13,8 @@ import WelcomeScreen from './screens/WelcomeScreen';
 import LoginForm from './screens/LoginForm';
 import SideMenuScreen from './screens/SideMenuScreen';
 
+import {COLORS, GRADIENTS} from './utils/colors';
+
 export default function App() {
 
   const [screen, setScreen] = useState(<WelcomeScreen onUserOption={showScreenHandler}/>);
@@ -42,8 +44,9 @@ export default function App() {
 
   return (
     <LinearGradient
-      colors={['#FFE6E6','#7a5492']}
+      colors={COLORS.gradient}
       style={styles.gradientComponent}
+      start={GRADIENTS.start} end={GRADIENTS.end}
     >
       <SafeAreaView style={styles.gradientComponent}>
         {screen}

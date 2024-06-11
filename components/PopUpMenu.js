@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { auth } from "../backend/config";
 
-export default function PopUpMenu({masterUid, onMembersPress, onDelGroupPress = null}){
+export default function PopUpMenu({masterUid, onMembersPress, onDelGroupPress = null, onSettleGroup = null}){
     const [visible, setVisible] = useState(false);
     const options={
         members: {
@@ -27,6 +27,12 @@ export default function PopUpMenu({masterUid, onMembersPress, onDelGroupPress = 
             icon: "delete-forever-outline",
             color: 'red',
             action: onDelGroupPress
+        },
+        settleDeBill: {
+            title: 'Settle group',
+            icon: 'credit-card-fast-outline',
+            color: 'green',
+            action: onSettleGroup
         }
     };
 
@@ -59,7 +65,7 @@ export default function PopUpMenu({masterUid, onMembersPress, onDelGroupPress = 
                                 size={26} color={"#212121"}
                             />
                         </TouchableOpacity>
-                        {auth.currentUser.uid == masterUid &&
+                        {auth.currentUser.uid == masterUid &&<>
                             <TouchableOpacity style={styles.option}
                                 onPress={options.delGroup.action}
                             >
@@ -68,6 +74,15 @@ export default function PopUpMenu({masterUid, onMembersPress, onDelGroupPress = 
                                     size={26} color={options.delGroup.color}
                                 />
                             </TouchableOpacity>
+                            <TouchableOpacity style={styles.option}
+                                onPress={options.settleDeBill.action}
+                            >
+                                <Text>{options.settleDeBill.title}</Text>
+                                <Icon name={options.settleDeBill.icon}
+                                    size={26} color={options.settleDeBill.color}
+                                />
+                            </TouchableOpacity>
+                            </>
                         }
                     </Animated.View>
                 </SafeAreaView>

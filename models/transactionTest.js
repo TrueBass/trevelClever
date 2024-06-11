@@ -130,7 +130,12 @@ export async function updateTotalAmount(transactionId, newAmount) {
  */
 export async function addMemberToAccount(transactionId, memberId) {
   const transactionRef = doc(fs, `transactions/${transactionId}`);
-  await updateDoc(transactionRef, { [`tAccount.${memberId}`]: null });
+  try{
+    const memberUid = `tAccount.${memberId}`;
+    await updateDoc(transactionRef, {[memberUid]: null});
+  }catch(error){
+    console.log(error.message);
+  }
 }
 
 /**
@@ -174,7 +179,7 @@ export async function splitTotalBetweenMembers(transactionId) {
 
   if (transaction.exists()) {
     const bill = transaction.data();
-    console.log(bill);
+    // console.log(bill);
 
     const divider = Object.keys(bill.tAccount).length; // Potential issue if tAccount is empty
 
@@ -188,7 +193,7 @@ export async function splitTotalBetweenMembers(transactionId) {
       // Update all members' debts to be equal.
       const updates = {};
       for (let memberId in bill.tAccount) {
-        updates[`tAccount.${memberId}`] = debt; // Potential issue if memberId doesn't exist
+        updates[memberId] = debt; // Potential issue if memberId doesn't exist
       }
       await updateDoc(transactionRef, { tAccount: updates });
     } else if (bill.tSplitType === 1) {

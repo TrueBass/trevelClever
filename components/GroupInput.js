@@ -27,7 +27,7 @@ function GroupInput(props){
     }
 
     function AddGroupHandler(){
-        props.onAddGroup(NameGroup);
+        (async()=>await props.onAddGroup(NameGroup,friendsToAddCheckDone,0))();
         setNameGroup('');
     }
 

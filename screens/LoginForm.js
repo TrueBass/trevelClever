@@ -14,11 +14,14 @@ import { auth } from '../backend/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 import PrimaryButton from '../components/PrimaryButton';
+import InputField from '../components/InputField';
 
 function LoginForm({onPressLogin, onCancel}) {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailEmptyString, setEmailEmptyString] = useState(false);
+  const [passwdEmptyString,setPasswdEmptyString] = useState(false);
   
   const handleLogin = async () => {
     try {
@@ -69,26 +72,38 @@ function LoginForm({onPressLogin, onCancel}) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Firebase Login Screen</Text>
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-        secureTextEntry
-        style={styles.input}
-      />
-      <PrimaryButton onPress={cancelButtonHandler}>
-        Cancel
-      </PrimaryButton>
-      <PrimaryButton onPress={handleLogin}>
-        Log In
-      </PrimaryButton>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center',}}>
+        <Text style={styles.title}>Firebase Login Screen</Text>
+      </View>
+      <View style={{flex:2, justifyContent: 'center', marginHorizontal: 30}}>
+        <InputField
+          fieldName="Email"
+          value={email}
+          onChangeText={(text) => {
+            setEmailEmptyString(text.trim().length === 0);
+            setEmail(text);
+          }}
+          emptyString={emailEmptyString}
+        />
+        <InputField
+          value={password}
+          fieldName="Password"
+          onChangeText={(text) => {
+            setPasswdEmptyString(text.trim().length === 0);
+            setPassword(text);
+          }}
+          secureTextEntry={true}
+          emptyString={passwdEmptyString}
+        />
+      </View>
+      <View style={{flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around'}}>
+        <PrimaryButton onPress={cancelButtonHandler}>
+          Cancel
+        </PrimaryButton>
+        <PrimaryButton onPress={handleLogin}>
+          Log In
+        </PrimaryButton>
+      </View>
     </View>
   );
 };
@@ -96,8 +111,8 @@ function LoginForm({onPressLogin, onCancel}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   title: {
     fontSize: 20,

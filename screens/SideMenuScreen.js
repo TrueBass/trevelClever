@@ -19,20 +19,18 @@ function SideMenuScreen({setScreen}) {
     const [currentUserUid, setCurrentUserUid] = useState(auth.currentUser.uid);
     const [nickName, setNickName] = useState("");
     const [avatarUrll, setAvatarUrl] = useState("");
+    const [renderOnce, setRenderOnce] = useState(true);
 
-    if (nickName === "" && avatarUrll === "") {
-        async function fetchData() {
-            const nick = await getNick(currentUserUid);
-            setNickName(nick);
-
-            const username = "Crazy Polish Bober";
-            const usrenamechange = username.replace(" ", '');         
-            const getAvatarUrl = (usrenamechange) => `https://api.dicebear.com/8.x/bottts/png?seed="${usrenamechange}"`;
-            const avatarUrl = getAvatarUrl(usrenamechange);
-            setAvatarUrl(avatarUrl);
-        }
-
-        fetchData();
+    async function fetchData() {
+        const nick = await getNick(currentUserUid);
+        setNickName(nick.replace(/\s/g,""));   
+        const getAvatarUrl = `https://api.dicebear.com/8.x/bottts/png?seed="${nickName}"`;
+        setAvatarUrl(getAvatarUrl);
+    }
+    
+    if(renderOnce){
+        (async()=>await fetchData())();
+        setRenderOnce(false);
     }
 
     return (

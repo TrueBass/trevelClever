@@ -1,6 +1,6 @@
 import {StyleSheet, View, Text, TextInput} from 'react-native';
 
-function InputField({keyboardType=null, emptyString=false, returnKeyType='default', onSearch=null, fieldName, value, onChangeText, placeholder, secureTextEntry}){
+function InputField({minLength = undefined, keyboardType=null, emptyString=false, returnKeyType='default', onSearch=null, fieldName, value, onChangeText, placeholder, secureTextEntry}){
     return (
         <View>
             {
@@ -10,7 +10,7 @@ function InputField({keyboardType=null, emptyString=false, returnKeyType='defaul
                 </Text>
             }
             <TextInput
-                style={[styles.textInputComponent,{borderColor: emptyString?'red':'#FFF8E3'}]}
+                style={[styles.textInputComponent,{borderColor: emptyString?'red':'#FFF8E3', minWidth: minLength}]}
                 placeholderTextColor={'#b6b6b68b'}
                 autoCapitalize='none'
                 placeholder={placeholder}

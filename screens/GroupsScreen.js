@@ -4,8 +4,12 @@ import GroupItem from "../components/GroupItem";
 import AddRoundButton from '../components/AddRoundButton';
 import GroupInput from "../components/GroupInput";
 import { auth } from '../backend/config';
-import { addGroup, getUserGroups, getGroupSnapshot, editGroupName } from '../models/groupTest';
+import { addGroup, getUserGroups, getGroupSnapshot, editGroupName, editGroup } from '../models/groupTest';
+
+import Groups from "../models/groupsSchema";
 import GroupItemScreen from "./GroupItemScreen";
+
+import { COLORS, STYLES } from "../utils/colors";
 
 function GroupsScreen() {
     const [currentScreen, setCurrentScreen] = useState('Groups');
@@ -24,8 +28,16 @@ function GroupsScreen() {
         refreshGroupList();
     }
 
-    async function AddGroupHandler(groupName) {
+    // function onSettleBill(){
+    //     setModalIsVisible(false);
+    //     // setUserGroupListData(userGroupListData.filter(g=>g.id === groupId));
+    //     (async()=>await refreshGroupList())();
+    // }
+
+    async function AddGroupHandler(groupName,groupMembers,totalSpent) {
         const newGroupId = await addGroup(currentUserUid);
+        const newGroupObj = Groups(false,auth.currentUser.uid,groupMembers,"",totalSpent,{},null);
+        await editGroup(newGroupId,newGroupObj);
         await editGroupName(newGroupId, groupName.trim());
         endAddGroupHandler();
     }
@@ -53,18 +65,18 @@ function GroupsScreen() {
                 onBack={() =>{ 
                     setIsGroupListChanged(true);
                     setCurrentScreen('Groups');
-                }} 
+                }}
             />;
     }
 
     if (isGroupListChanged) {
-        (async ()=>refreshGroupList())();
+        (async()=>await refreshGroupList())();
         setIsGroupListChanged(false);
     }
     
     return (
         <View style={styles.container}>
-            <View style={styles.groupListContainer}>
+            <View style={STYLES.flatList}>
                 <FlatList
                     data={userGroupListData} 
                     keyExtractor={itemData => itemData.id} 

@@ -26,6 +26,7 @@ export default function FriendsChecklist({currMembers = null, type = null, onCan
         // 1. give back ticked firends for adding
         // 2. hide this module
         onCheck(checkedNicksList);
+        setRenderOnce(true);
         setVisibleProp(false);
     }
     
@@ -42,7 +43,7 @@ export default function FriendsChecklist({currMembers = null, type = null, onCan
     }
 
     function onDoneAddingMembers(){
-        if(currMembers === null) return;
+        if(currMembers !== null){
         if(checkedNicksList.length === 0){
             showMessage({
                 message: "Hey!",
@@ -64,7 +65,7 @@ export default function FriendsChecklist({currMembers = null, type = null, onCan
                 });
                 return;
             }
-        }
+        }}
         onDone(checkedNicksList);
         setCheckedNicksList([]);
         setVisibleProp(false);
